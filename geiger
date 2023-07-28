@@ -228,7 +228,7 @@ function main()
     bltopleft = false
 
     if bot:findPath(midX, midY) then
-        sleep(move_delay)
+        sleep(3000)
         startSignal = get_signals()
     end
     if estatus() ~= Connected then
