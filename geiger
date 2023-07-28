@@ -1518,8 +1518,7 @@ function cari_owner()
     sleep(5000)
     while not found_owner do
         for _,ply in pairs(bot:getPlayers()) do
-	    log(ply.name)
-            local ncok = ply.name:match("`%w([%w]+)``")
+            local ncok = ply.name:match("`%g([%w]+)``")
             log(ncok)
             if check_owner_table(owner, ncok) then
                 bot:say("`2"..ncok.." `0Found")
