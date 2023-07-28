@@ -1,89 +1,3 @@
--- default delay (safe for ping 200+)
-move_delay = 1000 
-drop_delay = 5000
-warp_delay = 8000
-
-take_geiger = true  -- bot with no geiger in invetory will take geiger from save world before starting
-world_take_geiger = "marrsc"
-id_door_take_geiger = "dmr"
-
-world_owner = "ofbfa" --bot will visit this world to look for owner
-
-bot_settings = {
-    ["DASTASIDITAV"] = {
-        world_name = "m9a3r0r",     --geiger world name
-        world_id_door = "hehe",         --id door geiger world, leave it blank if you dont use door
-        storage_name = "ofbfa",          --storage name, if you leave it blank the bot will drop item in geiger world
-        storage_id_door = "yawdah",       --storage id door
-    },
-    [""] = {
-        world_name = "m9a3r1r",     --geiger world name
-        world_id_door = "",         --id door geiger world, leave it blank if you dont use door
-        storage_name = "",          --storage name, if you leave it blank the bot will drop item in geiger world
-        storage_id_door = "",       --storage id door
-    },
-    [""] = {
-        world_name = "m9a3r2r",     --geiger world name
-        world_id_door = "",         --id door geiger world, leave it blank if you dont use door
-        storage_name = "",          --storage name, if you leave it blank the bot will drop item in geiger world
-        storage_id_door = "",       --storage id door
-    },
-    [""] = {
-        world_name = "m9a3r3r",     --geiger world name
-        world_id_door = "",         --id door geiger world, leave it blank if you dont use door
-        storage_name = "",          --storage name, if you leave it blank the bot will drop item in geiger world
-        storage_id_door = "",       --storage id door
-    },
-    ["I65M3LV0ZQAK"] = {
-        world_name = "m9a3r4r",     --geiger world name
-        world_id_door = "",         --id door geiger world, leave it blank if you dont use door
-        storage_name = "",          --storage name, if you leave it blank the bot will drop item in geiger world
-        storage_id_door = "",       --storage id door
-    },
-    ["LNDLU20JGTB7"] = {
-        world_name = "m9a3r5r", 
-        world_id_door = "", 
-        storage_name = "",
-        storage_id_door = "",
-    },
-    ["QBEJH360WE"] = {
-        world_name = "m9a3r6r", 
-        world_id_door = "", 
-        storage_name = "b1a3r5o7n",
-        storage_id_door = "",
-    },
-    ["1D5YCEXHL9"] = {
-        world_name = "m9a3r7r", 
-        world_id_door = "", 
-        storage_name = "b1a3r5o7n",
-        storage_id_door = "baron",
-    },
-    [""] = {
-        world_name = "m9a3r8r",     --geiger world name
-        world_id_door = "",         --id door geiger world, leave it blank if you dont use door
-        storage_name = "",          --storage name, if you leave it blank the bot will drop item in geiger world
-        storage_id_door = "",       --storage id door
-    },
-    [""] = {
-        world_name = "m9a3r9r",     --geiger world name
-        world_id_door = "",         --id door geiger world, leave it blank if you dont use door
-        storage_name = "",          --storage name, if you leave it blank the bot will drop item in geiger world
-        storage_id_door = "",       --storage id door
-    }
-} --you can add more bots, just copy the format
-
-storage_pos = {good = 340, bad = 24} --where you drop your items at (either use block id or coordinate)
--- storage_pos = {x = 2, y = 2} this is coordinate (x,y)
--- or
--- storage_pos = {good = 340, bad = 20} this is block id (340 = chandelier, 20 = sign)
-
-
-rest_in_maindoor = true --bot will charge geiger in main door
-webhook_enabled = true
-webhook_url = "https://discordapp.com/api/webhooks/1133999708067606559/pki9hiXbeb5jG_M0fikcHXg3l-IS8jvBwZfPYfWLt2s7MK7lV4zcDtad4XY2JXzQwFEr"
-webhook_status_url = "https://discordapp.com/api/webhooks/1134371446718746715/IQa5wb32r-55vVKeSnBt6E58kLBYYG5kljykRw3yzw0DUrfmPafE5rGBTladLcpTV889"
-
--- Don't Touch
 bot = getBot()
 items = {6416, 3196, 1500, 1498, 2806, 2804, 8270, 8272, 8274, 4676, 4678, 4680, 4682, 4652, 4650, 4648, 4646, 11186, 10086, 10084, 2206, 2244, 2246, 2242, 2248, 2250, 3792, 3306, 4654, 3204, 12502}
 goods = {2206, 2242, 2244, 2246, 2248, 2250, 3792, 3306, 4654}
@@ -1608,6 +1522,7 @@ function cari_owner()
             if check_owner_table(owner, ncok) then
                 bot:say("`2"..ncok.." `0Found")
                 bot:say("Starting script")
+                sleep(5000)
                 found_owner = true
             end
             sleep(500)
@@ -1652,7 +1567,3 @@ function start_geiger()
         end
     end
 end
-
-
-
-start_geiger()
