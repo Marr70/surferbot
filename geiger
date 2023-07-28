@@ -254,7 +254,7 @@ function main()
             end
         else
             while true do
-                if (t%3600)/60 > 5 then
+                if ((os.time()-t)%3600)/60 > 5 then
                     break
                 end
                 if checkDirection() then
@@ -263,7 +263,7 @@ function main()
                 if estatus() ~= Connected then
                     return
                 end
-                if (t%3600)/60 > 5 then
+                if ((os.time()-t)%3600)/60 > 5 then
                     break
                 end
                 if checkDiagonal() then
@@ -272,12 +272,12 @@ function main()
                 if estatus() ~= Connected then
                     return
                 end
-                if (t%3600)/60 > 5 then
+                if ((os.time()-t)%3600)/60 > 5 then
                     break
                 end
             end
         end
-        if (t%3600)/60 > 5 then
+        if ((os.time()-t)%3600)/60 > 5 then
             log_msg("Can't  find item within 5 minutes, reconnect")
             bot:disconnect()
             sleep(5000)
