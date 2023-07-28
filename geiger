@@ -21,7 +21,7 @@ end
 
 function check_owner_table(table, value)
     for i, data in pairs(table) do
-        if data:upper() == value:upper() then
+        if string.upper(data) == string.upper(value) then
             return true
         end
     end
