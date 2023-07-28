@@ -245,18 +245,26 @@ function main()
             end
             sleep(1000)
             rapid_green()
-            sleep(2000)
+            sleep(1000)
             if estatus() ~= Connected then
                 return
             end
-            break
+            if not bot:isEquipped(2204) then
+                break
+            end
         else
             while true do
+                if (t%3600)/60 > 5 then
+                    break
+                end
                 if checkDirection() then
                     break
                 end
                 if estatus() ~= Connected then
                     return
+                end
+                if (t%3600)/60 > 5 then
+                    break
                 end
                 if checkDiagonal() then
                     break
@@ -264,7 +272,16 @@ function main()
                 if estatus() ~= Connected then
                     return
                 end
+                if (t%3600)/60 > 5 then
+                    break
+                end
             end
+        end
+        if (t%3600)/60 > 5 then
+            log_msg("Can't  find item within 5 minutes, reconnect")
+            bot:disconnect()
+            sleep(5000)
+            return
         end
     end
     te = os.time() - t
@@ -1492,10 +1509,8 @@ function connect()
     while true do
         while bot:getEnetStatus() ~= Connected do
             bot:reConnect()
-            sleep(10000)
+            sleep(20000)
             if not is_valid() then
-                bot:disconnect()
-                reconInfo()
                 while true do
                     sleep(10000)
                 end
