@@ -2,6 +2,7 @@ bot = getBot()
 items = {6416, 3196, 1500, 1498, 2806, 2804, 8270, 8272, 8274, 4676, 4678, 4680, 4682, 4652, 4650, 4648, 4646, 11186, 10086, 10084, 2206, 2244, 2246, 2242, 2248, 2250, 3792, 3306, 4654, 3204, 12502}
 goods = {2206, 2242, 2244, 2246, 2248, 2250, 3792, 3306, 4654}
 drop_list = {}
+stop_script = false
 custom_storage = false
 use_coord = false
 charging = false
@@ -1573,7 +1574,7 @@ function start_geiger()
         return
     end
 
-    cari_owner()
+    --cari_owner()
 
     tt = os.time()
     logs("Started")
