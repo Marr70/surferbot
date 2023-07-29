@@ -1436,11 +1436,11 @@ function check_inventory()
 end
 
 function tele(to, id)
-    while string.upper(bot:getWorld().name) ~= string.upper(to) do
-        bot:sendPacket("action|join_request\nname|"..string.upper(to).."\ninvitedWorld|0",3)
-        sleep(warp_delay)
-    end
     if id == "" or id == nil then
+        while string.upper(bot:getWorld().name) ~= string.upper(to) do
+            bot:sendPacket("action|join_request\nname|"..string.upper(to).."\ninvitedWorld|0",3)
+            sleep(warp_delay)
+        end
         return
     end
     while bot:getTile(math.floor(bot:getLocal().pos.x/32), math.floor(bot:getLocal().pos.y/32)).fg == 6 do
