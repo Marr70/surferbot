@@ -1,6 +1,7 @@
 bot = getBot()
 items = {6416, 3196, 1500, 1498, 2806, 2804, 8270, 8272, 8274, 4676, 4678, 4680, 4682, 4652, 4650, 4648, 4646, 11186, 10086, 10084, 2206, 2244, 2246, 2242, 2248, 2250, 3792, 3306, 4654, 3204, 12502}
 goods = {2206, 2242, 2244, 2246, 2248, 2250, 3792, 3306, 4654}
+drop_list = {}
 custom_storage = false
 use_coord = false
 charging = false
@@ -1281,105 +1282,11 @@ function drop(id, count)
     sleep(1000)
 end
 
-function drop_coord(item)
-    local changer
-    local arah
-    if contains(goods, item) then
-        changer = 1
-        arah = "right"
-    else
-        changer = -1
-        arah = "left"
-    end
-
-    while getPosX() ~= storage_pos.x or getPosY() ~= storage_pos.y do
-        if bot:findPath(storage_pos.x, storage_pos.y) then
-            sleep(1000)
-        end
-        if estatus() ~= Connected then
-            return
-        end
-    end
-    sleep(500)
-    while bot:getItemCount(item) > 0 do
-        if tile_drop(storage_pos.x + changer, getPosY(), bot:getItemCount(item)) then
-            face_side(arah)
-            log_msg(string.format("Dropping Reward: %ix %s", bot:getItemCount(item), getItemInfo(item).name))
-            sleep(1000)
-            while bot:getItemCount(item) > 0 and tile_drop(storage_pos.x + changer, getPosY(), bot:getItemCount(item)) do 
-                drop(item)
-                sleep(1000)
-            end
-        else
-            bot:move(UP,1)
-            sleep(move_delay)
-            if estatus() ~= Connected then
-                return
-            end
-        end
-    end
-end
-
-function drop_blockid(item)
-    if contains(goods, item) then
-        pos_drop = storage_pos.good
-    else
-        pos_drop = storage_pos.bad
-    end
-
-    while bot:getItemCount(item) > 0 do
-        for _,tile in ipairs(bot:getTiles()) do
-            if tile.fg == pos_drop or tile.bg == pos_drop then
-                if tile_drop(tile.x, tile.y, bot:getItemCount(item)) then
-                    while getPosX() ~= (tile.x - 1) or getPosY() ~= tile.y do
-                        if bot:findPath(tile.x - 1, tile.y) then
-                            sleep(1000)
-                        end
-                        if estatus() ~= Connected then
-                            return
-                        end
-                    end
-                    face_side("right")
-                    log_msg(string.format("Dropping Reward: %ix %s", bot:getItemCount(item), getItemInfo(item).name))
-                    sleep(1000)
-                    while bot:getItemCount(item) > 0 and tile_drop(tile.x, tile.y, bot:getItemCount(item)) do
-                        bot:drop(item, bot:getItemCount(item))
-                        sleep(1000)
-                    end
-                end
-            end
-            if bot:getItemCount(item) == 0 then
-                break
-            end
-        end
-    end
-end
-
-function drop_item(item)
-    bot:autoCollect(2,false)
+function drop_coord()
     local changer
     local arah
 
-    if custom_storage then
-        tele(storage_name,storage_id_door)
-        if not use_coord then
-            drop_blockid(item)
-            if estatus() ~= Connected then
-                return
-            end
-        else
-            drop_coord(item)
-            if estatus() ~= Connected then
-                return
-            end
-        end
-        sleep(2000)
-        tele(geiger_world,geiger_id)
-        return
-    end
-
-    if not custom_storage then
-        tele(geiger_world,geiger_id)
+    for _,item in pairs(drop_list) do
         if contains(goods, item) then
             changer = 1
             arah = "right"
@@ -1387,25 +1294,24 @@ function drop_item(item)
             changer = -1
             arah = "left"
         end
-
-        sleep(1000)
-        while getPosX() ~= 45 or getPosY() ~= 53 do
-            if bot:findPath(45,53) then
-                sleep(1000)
+        sleep(500)
+        while getPosX() ~= storage_pos.x or getPosY() ~= storage_pos.y do
+            if bot:findPath(storage_pos.x, storage_pos.y) then
+                sleep(1500)
             end
             if estatus() ~= Connected then
                 return
             end
         end
-        sleep(500)
+
         while bot:getItemCount(item) > 0 do
-            if tile_drop(45 + changer, getPosY(), bot:getItemCount(item)) then
+            if tile_drop(storage_pos.x + changer, getPosY(), bot:getItemCount(item)) then
                 face_side(arah)
                 log_msg(string.format("Dropping Reward: %ix %s", bot:getItemCount(item), getItemInfo(item).name))
-                sleep(1000)
+                sleep(1500)
                 while bot:getItemCount(item) > 0 and tile_drop(storage_pos.x + changer, getPosY(), bot:getItemCount(item)) do 
                     drop(item)
-                    sleep(1000)
+                    sleep(1500)
                 end
             else
                 bot:move(UP,1)
@@ -1418,13 +1324,114 @@ function drop_item(item)
     end
 end
 
+function drop_blockid()
+    for _,item in pairs(drop_list) do
+        if contains(goods, item) then
+            local pos_drop = storage_pos.good
+        else
+            local pos_drop = storage_pos.bad
+        end
+        sleep(500)
+        for _,tile in pairs(bot:getTiles()) do
+            if tile.fg == pos_drop or tile.bg == pos_drop then
+                if tile_drop(tile.x, tile.y, bot:getItemCount(item)) then
+                    while getPosX() ~= (tile.x - 1) or getPosY() ~= tile.y do
+                        if bot:findPath(tile.x - 1, tile.y) then
+                            sleep(1500)
+                        end
+                        if estatus() ~= Connected then
+                            return
+                        end
+                    end
+                    face_side("right")
+                    log_msg(string.format("Dropping Reward: %ix %s", bot:getItemCount(item), getItemInfo(item).name))
+                    sleep(1500)
+                    while bot:getItemCount(item) > 0 and tile_drop(tile.x, tile.y, bot:getItemCount(item)) do
+                        drop(item)
+                        sleep(1500)
+                    end
+                end
+            end
+            if bot:getItemCount(item) == 0 then
+                break
+            end
+        end
+    end
+end
+
+function drop_item()
+    bot:autoCollect(2,false)
+    local changer
+    local arah
+
+    if custom_storage then
+        tele(storage_name,storage_id_door)
+        if not use_coord then
+            drop_blockid()
+            if estatus() ~= Connected then
+                return
+            end
+        else
+            drop_coord()
+            if estatus() ~= Connected then
+                return
+            end
+        end
+        sleep(2000)
+        drop_list = {}
+        tele(geiger_world,geiger_id)
+        return
+    end
+
+    if not custom_storage then
+        tele(geiger_world,geiger_id)
+
+        for _,item in pairs(drop_list) do
+            if contains(goods, item) then
+                changer = 1
+                arah = "right"
+            else
+                changer = -1
+                arah = "left"
+            end
+            sleep(500)
+            while getPosX() ~= 45 or getPosY() ~= 53 do
+                if bot:findPath(45,53) then
+                    sleep(1500)
+                end
+                if estatus() ~= Connected then
+                    return
+                end
+            end
+
+            while bot:getItemCount(item) > 0 do
+                if tile_drop(45 + changer, getPosY(), bot:getItemCount(item)) then
+                    face_side(arah)
+                    log_msg(string.format("Dropping Reward: %ix %s", bot:getItemCount(item), getItemInfo(item).name))
+                    sleep(1500)
+                    while bot:getItemCount(item) > 0 and tile_drop(45 + changer, getPosY(), bot:getItemCount(item)) do 
+                        drop(item)
+                        sleep(1500)
+                    end
+                else
+                    bot:move(UP,1)
+                    sleep(move_delay)
+                    if estatus() ~= Connected then
+                        return
+                    end
+                end
+            end
+        end
+        drop_list = {}
+    end
+end
+
 function check_inventory()
     for i, item in pairs(items) do
         if bot:getItemCount(item) > 0 then
-            return item
+            table.insert(drop_list, item)
         end
     end
-    return 0
 end
 
 function tele(to, id)
@@ -1467,10 +1474,11 @@ function charge_geiger()
 end
 
 function process_auto_geiger()
-    item = check_inventory()
-    if item > 0 then
-        sleep(move_delay)
-        drop_item(item)
+    check_inventory()
+    sleep(2000)
+    if #drop_list > 0 then
+        sleep(2000)
+        drop_item()
         return
     end
     if charging then
