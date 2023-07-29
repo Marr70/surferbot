@@ -9,7 +9,7 @@ use_coord = false
 charging = false
 found_owner = false
 multibot = false
-midX, midY = 50, 27
+
 
 function check_table(table)
     if table.x and table.y then
@@ -217,6 +217,7 @@ function cek_multibot(tbl, element)
 end
 
 function main()
+    midX, midY = 50, 27
     goods = {}
   
     check_geiger()
@@ -289,7 +290,7 @@ function main()
             end
         else
             while true do
-                if ((os.time()-t)%3600)/60 > 5 then
+                if ((os.time()-t)%3600)/60 > 10 then
                     break
                 end
                 if checkDirection() then
@@ -298,7 +299,7 @@ function main()
                 if estatus() ~= Connected then
                     return
                 end
-                if ((os.time()-t)%3600)/60 > 5 then
+                if ((os.time()-t)%3600)/60 > 10 then
                     break
                 end
                 if checkDiagonal() then
@@ -307,13 +308,13 @@ function main()
                 if estatus() ~= Connected then
                     return
                 end
-                if ((os.time()-t)%3600)/60 > 5 then
+                if ((os.time()-t)%3600)/60 > 10 then
                     break
                 end
             end
         end
-        if ((os.time()-t)%3600)/60 > 5 then
-            log_msg("Can't  find item within 5 minutes, reconnect")
+        if ((os.time()-t)%3600)/60 > 10 then
+            log_msg("Can't  find item within 10 minutes, reconnect")
             bot:disconnect()
             sleep(5000)
             return
