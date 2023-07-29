@@ -2,11 +2,13 @@ bot = getBot()
 items = {6416, 3196, 1500, 1498, 2806, 2804, 8270, 8272, 8274, 4676, 4678, 4680, 4682, 4652, 4650, 4648, 4646, 11186, 10086, 10084, 2206, 2244, 2246, 2242, 2248, 2250, 3792, 3306, 4654, 3204, 12502}
 goods = {2206, 2242, 2244, 2246, 2248, 2250, 3792, 3306, 4654}
 drop_list = {}
+duplicate_line = {}
 stop_script = false
 custom_storage = false
 use_coord = false
 charging = false
 found_owner = false
+multibot = false
 midX, midY = 50, 27
 
 function check_table(table)
@@ -15,7 +17,7 @@ function check_table(table)
     elseif table.good and table.bad then
         use_coord = false
     else
-        log("storage_pos not valid, check example in server")
+        log("storage_pos not valid, check example in server\n")
         stop_script = true
         return
     end
@@ -141,12 +143,13 @@ function check_geiger()
     end
 end
 
-function has_same_worldname(table)
+function has_same_worldname(tbl)
     local store_name = {}
 
-    for key,data in pairs(table) do
-        if data.world_name == world_name then
+    for key,data in pairs(tbl) do
+        if string.upper(data.world_name) == string.upper(geiger_world) then
             store_name[#store_name + 1] = key
+            duplicate_line[getBot(key):getIndex()] = key 
         end
     end
     return store_name
@@ -204,6 +207,15 @@ function estatus()
     return bot:getEnetStatus()
 end
 
+function cek_multibot(tbl, element)
+    for i,data in pairs(tbl) do
+        if string.upper(data.name) == string.upper(element) then
+            return true
+        end
+    end
+    return false
+end
+
 function main()
     goods = {}
   
@@ -216,6 +228,27 @@ function main()
     end
 
     tele(geiger_world,geiger_id)
+
+    if multibot then
+        for _,player in pairs(duplicate_line) do
+            if not getBot(player):isEquipped(2204) then
+                while getBot(player):getItemCount(2204) == 0 and getBot(player):getItemCount(2286) == 0 do
+                    sleep(2000)
+                end
+            end
+        end
+        for ko,bo in pairs(duplicate_line) do
+            if string.upper(bo) == string.upper(getBot():getLocal().name) then
+                break
+            end
+            if string.upper(bo) ~= string.upper(getBot():getLocal().name) then
+                while getBot(bo):getItemCount(2286) == 0 do
+                    sleep(2000)
+                end
+            end
+        end
+    end
+
     sleep(2000)
     break_toxic_waste()
     reserve_items()
@@ -1175,14 +1208,14 @@ function checkDiagonal()
 end
 
 function log_msg(message)   
-    log(string.format("[%s] %s", bot:getLocal().name, message))
+    log(string.format("[%s] %s \n", bot:getLocal().name, message))
     if webhook_enabled then
         send_webhook(message)
     end
 end 
 
 function logs(message)
-    log(string.format("[%s] %s", bot:getLocal().name, message))
+    log(string.format("[%s] %s \n", bot:getLocal().name, message))
 end
 
 function get_enet_status()
@@ -1284,6 +1317,7 @@ function drop(id, count)
 end
 
 function drop_coord()
+    sleep(2000)
     local changer
     local arah
 
@@ -1316,7 +1350,7 @@ function drop_coord()
                 end
             else
                 bot:move(UP,1)
-                sleep(move_delay)
+                sleep(2000)
                 if estatus() ~= Connected then
                     return
                 end
@@ -1326,25 +1360,27 @@ function drop_coord()
 end
 
 function drop_blockid()
+    sleep(2000)
+    local pos_drop
     for _,item in pairs(drop_list) do
         if contains(goods, item) then
-            local pos_drop = storage_pos.good
+            pos_drop = storage_pos.good
         else
-            local pos_drop = storage_pos.bad
+            pos_drop = storage_pos.bad
         end
         sleep(500)
         for _,tile in pairs(bot:getTiles()) do
             if tile.fg == pos_drop or tile.bg == pos_drop then
                 if tile_drop(tile.x, tile.y, bot:getItemCount(item)) then
-                    while getPosX() ~= (tile.x - 1) or getPosY() ~= tile.y do
-                        if bot:findPath(tile.x - 1, tile.y) then
+                    while getPosX() ~= (tile.x + 1) or getPosY() ~= tile.y do
+                        if bot:findPath(tile.x + 1, tile.y) then
                             sleep(1500)
                         end
                         if estatus() ~= Connected then
                             return
                         end
                     end
-                    face_side("right")
+                    face_side("left")
                     log_msg(string.format("Dropping Reward: %ix %s", bot:getItemCount(item), getItemInfo(item).name))
                     sleep(1500)
                     while bot:getItemCount(item) > 0 and tile_drop(tile.x, tile.y, bot:getItemCount(item)) do
@@ -1416,7 +1452,7 @@ function drop_item()
                     end
                 else
                     bot:move(UP,1)
-                    sleep(move_delay)
+                    sleep(2000)
                     if estatus() ~= Connected then
                         return
                     end
@@ -1436,11 +1472,11 @@ function check_inventory()
 end
 
 function tele(to, id)
+    while string.upper(bot:getWorld().name) ~= string.upper(to) do
+        bot:sendPacket("action|join_request\nname|"..string.upper(to).."\ninvitedWorld|0",3)
+        sleep(warp_delay)
+    end
     if id == "" or id == nil then
-        while string.upper(bot:getWorld().name) ~= string.upper(to) do
-            bot:sendPacket("action|join_request\nname|"..string.upper(to).."\ninvitedWorld|0",3)
-            sleep(warp_delay)
-        end
         return
     end
     while bot:getTile(math.floor(bot:getLocal().pos.x/32), math.floor(bot:getLocal().pos.y/32)).fg == 6 do
@@ -1554,6 +1590,39 @@ function cari_owner()
     end
 end
 
+function lolos(table, input)
+    for i,data in pairs(table) do
+        if string.upper(data:getLocal().name) == string.upper(input) then
+            return true
+        end
+    end
+    return false
+end
+
+function check_duplicate()
+    local duplicate = has_same_worldname(bot_settings)
+    if #duplicate > 1 then
+        multibot = true
+        if #duplicate > 3 then
+            local result = ""
+            for _,i in pairs(duplicate) do
+                result = result .. "["..i.."]  "
+            end
+            log(result.."\nThere are "..#duplicate.." bot with same world_name, the script will not run for these bot\n")
+            stop_script = true
+            return
+        end
+
+        for _,b in pairs(duplicate) do
+            if not lolos(getAllBot(), b) then
+                log("If you want to use multiple bot in one world, please make sure bot is in one rdp\n")
+                stop_script = true
+                return
+            end
+        end
+    end
+end
+
 function start_geiger()
     geiger_world = bot_settings[string.upper(getBot():getLocal().name)].world_name
     geiger_id = bot_settings[string.upper(getBot():getLocal().name)].world_id_door
@@ -1564,13 +1633,9 @@ function start_geiger()
         check_table(storage_pos)
     end
 
-    if stop_script then
-        return
-    end
+    check_duplicate()
 
-    local duplicate = has_same_worldname(bot_settings)
-    if #duplicate > 1 then
-        logs("There are other bot with same world_name, the script will not run for this bot")
+    if stop_script then
         return
     end
 
