@@ -1657,3 +1657,5 @@ function start_geiger()
         end
     end
 end
+
+start_geiger()
