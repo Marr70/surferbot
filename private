@@ -1640,7 +1640,7 @@ function start_geiger()
         return
     end
 
-    cari_owner()
+    --cari_owner()
 
     tt = os.time()
     logs("Started")
