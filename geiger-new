@@ -789,7 +789,7 @@ function checkGeiger()
     end
     if bot:getItemCount(2286) > 0 then
         sleep(1000)
-        tele(geigerWorld,geigerDoor)
+        warp(geigerWorld,geigerDoor)
         charging = true
         return
     end
