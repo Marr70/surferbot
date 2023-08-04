@@ -1261,6 +1261,7 @@ function connect()
 end
 
 function searchOwner()
+    logs("Searching for Owner")
     warp(worldOwner)
     sleep(500)
     bot:say("Waiting for `2owner")
