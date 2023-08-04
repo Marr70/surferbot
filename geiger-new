@@ -1,7 +1,7 @@
 bot = getBot()
 
 startSignal = 0
-stopScirpt = false
+stopScript = false
 charging = false
 multiBot = false
 coordinateDrop = false
