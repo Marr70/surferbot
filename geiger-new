@@ -18,6 +18,23 @@ duplicateLine = {}
 dropList = {}
 storageList = {}
 
+function reconnect(w,id,x,y)
+    if eStatus() ~= Connected then
+        reconInfo()
+        sleep(500)
+        connect()
+        sleep(500)
+        reconInfo()
+        warp(w,id)
+        sleep(2000)
+        if x and y then
+            if bot:finPath(x,y) then
+                sleep(1500)
+            end
+        end
+    end
+end
+
 function sendStorage(msgid)
     scanStorage()
     sleep(500)
@@ -40,7 +57,7 @@ function sendStorage(msgid)
             },
             {
                 "name": "[Bad Items]",
-                "value": "<:PNeck:1136676041881026632> **Purple V-Neck** ]]..getCount(4680)..[[:\n<:ONeck:1136676131035156572> **Orange V-Neck :** ]]..getCount(4682)..[[\n<:HazmatBoot:1136675978240852120> **Hazmat Boots :** ]]..getCount(4646)..[[\n<:HazmatPants:1136675886817607680> **Hazmat Pants :** ]]..getCount(4648)..[[\n<:HazmatSuit:1136675828810387597> **azmat Suits :** ]]..getCount(4650)..[[\n<:HazmatHelmet:1136675923849121824> **Hazmat Helmet :** ]]..getCount(4652)..[[\n<:DigitalSign:1136675778986246146> **Digital Sign :** ]]..getCount(11186)..[[\n<:AnimeFemale:1136675729417977956> **Anime Female :** ]]..getCount(10086)..[[\n<:AnimeMale:1136675689614020668> **Anime Male :** ]]..getCount(10084)..[[\n<:NerdHair:1136675648899911851> **Nerd Hair :** ]]..getCount(12502)..[[\n<:TreeDeco:1136675561578713199> **Tree Decorations :** ]]..getCount(3204)..[[",
+                "value": "<:PNeck:1136676041881026632> **Purple V-Neck :** ]]..getCount(4680)..[[\n<:ONeck:1136676131035156572> **Orange V-Neck :** ]]..getCount(4682)..[[\n<:HazmatBoot:1136675978240852120> **Hazmat Boots :** ]]..getCount(4646)..[[\n<:HazmatPants:1136675886817607680> **Hazmat Pants :** ]]..getCount(4648)..[[\n<:HazmatSuit:1136675828810387597> **azmat Suits :** ]]..getCount(4650)..[[\n<:HazmatHelmet:1136675923849121824> **Hazmat Helmet :** ]]..getCount(4652)..[[\n<:DigitalSign:1136675778986246146> **Digital Sign :** ]]..getCount(11186)..[[\n<:AnimeFemale:1136675729417977956> **Anime Female :** ]]..getCount(10086)..[[\n<:AnimeMale:1136675689614020668> **Anime Male :** ]]..getCount(10084)..[[\n<:NerdHair:1136675648899911851> **Nerd Hair :** ]]..getCount(12502)..[[\n<:TreeDeco:1136675561578713199> **Tree Decorations :** ]]..getCount(3204)..[[",
                 "inline": true
             },
             {
@@ -167,14 +184,17 @@ function searchGreen()
                 if bot:findPath(midx1,midy1) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx1,midy1)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx1,midy1)
             if getSignal() > 2 then
                 return
             elseif getSignal() < 2 then
                 if bot:findPath(midx1,midy1) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx1,midy1)
                 break
             end
         end
@@ -185,14 +205,17 @@ function searchGreen()
                 if bot:findPath(midx1,midy1) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx1,midy1)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx1,midy1)
             if getSignal() > 2 then
                 return
             elseif getSignal() < 2 then
                 if bot:findPath(midx1,midy1) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx1,midy1)
                 break
             end
         end
@@ -201,6 +224,7 @@ function searchGreen()
             if bot:findPath(mx,my + 4) then
                 sleep(1000)
             end
+            reconnect(geigerWorld, geigerDoor, mx,my + 4)
             break
         else
             if bot:findPath(midx1,midy1 - 4) then
@@ -209,14 +233,17 @@ function searchGreen()
                     if bot:findPath(mx,my + 4) then
                         sleep(1000)
                     end
+                    reconnect(geigerWorld, geigerDoor, mx,my + 4)
                     break
                 end
             else
                 if bot:findPath(mx,my + 4) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, mx,my + 4)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, mx,my - 4)
         end
     end
 
@@ -230,14 +257,17 @@ function searchGreen()
                 if bot:findPath(midx2,midy2) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx2, midy2)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx2, midy2)
             if getSignal() > 2 then
                 return
             elseif getSignal() < 2 then
                 if bot:findPath(midx2,midy2) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx2, midy2)
                 break
             end
         end
@@ -248,14 +278,17 @@ function searchGreen()
                 if bot:findPath(midx2,midy2) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx2, midy2)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx2, midy2)
             if getSignal() > 2 then
                 return
             elseif getSignal() < 2 then
                 if bot:findPath(midx2,midy2) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx2, midy2)
                 break
             end
         end
@@ -271,6 +304,7 @@ function searchGreen()
             else
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx2, midy2 + 4)
         end
     end
 end
@@ -287,14 +321,17 @@ function searchRapid()
                 if bot:findPath(midx3,midy3) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx3,midy3)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx3,midy3)
             if getSignal() > 3 then
                 return
             elseif getSignal() < 3 then
                 if bot:findPath(midx3,midy3) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx3,midy3)
                 break
             end
         end
@@ -305,14 +342,17 @@ function searchRapid()
                 if bot:findPath(midx3,midy3) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx3,midy3)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx3,midy3)
             if getSignal() > 3 then
                 return
             elseif getSignal() < 3 then
                 if bot:findPath(midx3,midy3) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx3,midy3)
                 break
             end
         end
@@ -321,6 +361,7 @@ function searchRapid()
             if bot:findPath(mx2,my2 + 2) then
                 sleep(1000)
             end
+            reconnect(geigerWorld, geigerDoor, mx2,my2 + 2)
             break
         else
             if bot:findPath(midx3,midy3 - 2) then
@@ -329,14 +370,17 @@ function searchRapid()
                     if bot:findPath(mx2,my2 + 2) then
                         sleep(1000)
                     end
+                    reconnect(geigerWorld, geigerDoor, mx2,my2 + 2)
                     break
                 end
             else
                 if bot:findPath(mx2,my2 + 2) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, mx2,my2 + 2)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx3,midy3 - 2)
         end
     end
 
@@ -350,14 +394,17 @@ function searchRapid()
                 if bot:findPath(midx4,midy4) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx4,midy4)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx4,midy4)
             if getSignal() > 3 then
                 return
             elseif getSignal() < 3 then
                 if bot:findPath(midx4,midy4) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx4,midy4)
                 break
             end
         end
@@ -368,14 +415,17 @@ function searchRapid()
                 if bot:findPath(midx4,midy4) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx4,midy4)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx4,midy4)
             if getSignal() > 3 then
                 return
             elseif getSignal() < 3 then
                 if bot:findPath(midx4,midy4) then
                     sleep(500)
                 end
+                reconnect(geigerWorld, geigerDoor, midx4,midy4)
                 break
             end
         end
@@ -391,6 +441,7 @@ function searchRapid()
             else
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx4,midy4 + 2)
         end
     end
 end
@@ -407,18 +458,22 @@ function searchPrize()
                 if bot:findPath(99,getPosY()) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx5,midy5)
             end
+            reconnect(geigerWorld, geigerDoor, midx5,midy5)
             if not bot:isEquipped(2204) then
                 return
             elseif getSignal() < 4 then
                 if bot:findPath(midx5,midy5) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx5,midy5)
                 break
             elseif getPosX() == 99 then
                 if bot:findPath(midx5,midy5) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx5,midy5)
                 break
             end
         end
@@ -429,19 +484,23 @@ function searchPrize()
                 if bot:findPath(0,getPosY()) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx5,midy5)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx5,midy5)
             if not bot:isEquipped(2204) then
                 return
             elseif getSignal() < 4 then
                 if bot:findPath(midx5,midy5) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx5,midy5)
                 break
             elseif getPosX() == 0 then
                 if bot:findPath(midx5,midy5) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx5,midy5)
                 break
             end
         end
@@ -449,6 +508,7 @@ function searchPrize()
             if bot:findPath(mx3,my3 + 1) then
                 sleep(1500)
             end
+            reconnect(geigerWorld, geigerDoor, mx3,my3 + 1)
             break
         else
             if bot:findPath(midx5,midy5 - 1) then
@@ -457,14 +517,17 @@ function searchPrize()
                     if bot:findPath(mx3,my3 + 1) then
                         sleep(1500)
                     end
+                    reconnect(geigerWorld, geigerDoor, mx3,my3 + 1)
                     break
                 end
             else
                 if bot:findPath(mx3,my3 + 1) then
                     sleep(1500)
                 end
+                reconnect(geigerWorld, geigerDoor, mx3,my3 + 1)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx5,midy5 - 1)
         end
     end
 
@@ -478,19 +541,23 @@ function searchPrize()
                 if bot:findPath(99,getPosY()) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx6,midy6)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx6,midy6)
             if not bot:isEquipped(2204) then
                 return
             elseif getSignal() < 4 then
                 if bot:findPath(midx6,midy6) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx6,midy6)
                 break
             elseif getPosX() == 99 then
                 if bot:findPath(midx6,midy6) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx6,midy6)
                 break
             end
         end
@@ -501,19 +568,23 @@ function searchPrize()
                 if bot:findPath(0,getPosY()) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx6,midy6)
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx6,midy6)
             if not bot:isEquipped(2204) then
                 return
             elseif getSignal() < 4 then
                 if bot:findPath(midx6,midy6) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx6,midy6)
                 break
             elseif getPosX() == 0 then
                 if bot:findPath(midx6,midy6) then
                     sleep(1000)
                 end
+                reconnect(geigerWorld, geigerDoor, midx6,midy6)
                 break
             end
         end
@@ -529,6 +600,7 @@ function searchPrize()
             else
                 break
             end
+            reconnect(geigerWorld, geigerDoor, midx6,midy6 + 1)
         end
     end
 end
@@ -561,6 +633,7 @@ function checkBlock(index)
                     return
                 end
             end
+            reconnect(geigerWorld, geigerDoor, ex + v.x, ye + v.y)
         end
     else
         for _,v in pairs(secondLayer1) do
@@ -571,6 +644,7 @@ function checkBlock(index)
                     return
                 end
             end
+            reconnect(geigerWorld, geigerDoor, ex + v.x, ye + v.y)
         end
     end
 end
@@ -588,6 +662,7 @@ function startSearch()
                     break
                 end
             end
+            reconnect(geigerWorld, geigerDoor, tile.x,tile.y)
         end
         if ((os.time()-t)%3600)/60 > 5 then
             logMsg("Can't  find item within 5 minutes, reconnect")
@@ -939,6 +1014,36 @@ function reconInfo()
     x = httpReq(RequestINFO)
 end
 
+function banInfo()
+    ut = os.time() - tt
+    color = 9242129
+
+    local script = [[
+        {
+            "content": "@everyone",
+            "embeds": [
+              {
+                "title": "[]]..string.lower(bot:getLocal().name)..[[] status is ]]..bStatus()..[[",
+                "color": ]]..color..[[,
+                "footer": {
+                    "text": "Bot Uptime: ]]..math.floor(ut/86400)..[[ Day ]]..math.floor(ut%86400/3600)..[[ Hour ]]..math.floor(ut%86400%3600/60)..[[ Minute \nMarr's Script | ]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[["
+                }
+              }
+            ],
+            "username": "Status Logs",
+            "avatar_url": "https://i.ibb.co/5nsZxb6/Marr-script-1.png",
+            "attachments": []
+        }
+    ]]
+
+    RequestINFO={}
+    RequestINFO.url = webhookStatusUrl
+    RequestINFO.method = POST
+    RequestINFO.json = true
+    RequestINFO.postData = script
+    x = httpReq(RequestINFO)
+end
+
 function sendWebhook(text)
     ut = os.time() - tt
     local script = [[
@@ -1245,6 +1350,7 @@ function connect()
             bot:reConnect()
             sleep(30000)
             if not isValid() then
+                banInfo()
                 while true do
                     sleep(10000)
                 end
