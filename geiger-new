@@ -1,1 +1,1318 @@
-h
+bot = getBot()
+
+startSignal = 0
+stopScirpt = false
+charging = false
+multiBot = false
+coordinateDrop = false
+foundOwner = false
+customStorage = false
+
+BADS = {6416, 3196, 1500, 1498, 2806, 2804, 8270, 8272,8274, 4676, 4678, 4680, 4682, 4652, 4650, 4648, 4646, 11186, 10086, 10084,3204, 12502}
+GOODIES = {2206, 2242, 2244, 2246, 2248, 2250, 3792, 3306, 4654}
+firstLayer = {{x = 15, y = 13},{x = 49, y = 13},{x = 84, y = 13},{x = 15, y = 40},{x = 49, y = 40},{x = 84, y = 40}}
+secondLayer1 = {{x = -7, y = -7},{x = 7, y = -7},{x = -7, y = 7},{x = 7, y = 7}}
+secondLayer2 = {{x = -9, y = -7},{x = 9, y = -7},{x = -9, y = 7},{x = 9, y = 7}}
+thirdLayer = {{x = 5, y = -5},{x = -5, y = -5},{x = -5, y = 5},{x = 5, y = 5}}
+duplicateLine = {}
+dropList = {}
+storageList = {}
+
+function sendStorage(msgid)
+    scanStorage()
+    sleep(500)
+    local profit = countProfit()
+    local DL = math.floor(profit/100)
+    local WL = math.floor(profit%100)
+
+    local script = [[
+    {
+        "content": null,
+        "embeds": [
+        {
+            "title": "World: ||]]..string.upper(bot:getCurrentWorld())..[[||",
+            "color": 60415,
+            "fields": [
+            {
+                "name": "[Bad Items]",
+                "value": "<:StarFuel:1136676403916591154> **Star Fuel :** ]]..getCount(6416)..[[\n<:NuclearFuel:1136676344076456077> **Nuclear Fuel :** ]]..getCount(3196)..[[\n<:OStuff:1136676564650692639> **Orange Stuff :** ]]..getCount(1500)..[[\n<:PStuff:1136676534623686746> **Purple Stuff :** ]]..getCount(1498)..[[\n<:BLStuff:1136676639946850384> **Blue Stuff :** ]]..getCount(2806)..[[\n<:GStuff:1136676602701434910> **Green Stuff :** ]]..getCount(2804)..[[\n<:RStuff:1136676492596740176> **Red Stuff :** ]]..getCount(8270)..[[\n<:WStuff:1136676454877380638> **White Stuff :** ]]..getCount(8272)..[[\n<:BStuff:1136676679381684364> **Black Stuff :** ]]..getCount(8274)..[[\n<:GNeck:1136676221263028374> **Green V-Neck :** ]]..getCount(4676)..[[\n<:BNeck:1136676294424277172> **Blue V-Neck :** ]]..getCount(4678)..[[",
+                "inline": true
+            },
+            {
+                "name": "[Bad Items]",
+                "value": "<:PNeck:1136676041881026632> **Purple V-Neck** ]]..getCount(4680)..[[:\n<:ONeck:1136676131035156572> **Orange V-Neck :** ]]..getCount(4682)..[[\n<:HazmatBoot:1136675978240852120> **Hazmat Boots :** ]]..getCount(4646)..[[\n<:HazmatPants:1136675886817607680> **Hazmat Pants :** ]]..getCount(4648)..[[\n<:HazmatSuit:1136675828810387597> **azmat Suits :** ]]..getCount(4650)..[[\n<:HazmatHelmet:1136675923849121824> **Hazmat Helmet :** ]]..getCount(4652)..[[\n<:DigitalSign:1136675778986246146> **Digital Sign :** ]]..getCount(11186)..[[\n<:AnimeFemale:1136675729417977956> **Anime Female :** ]]..getCount(10086)..[[\n<:AnimeMale:1136675689614020668> **Anime Male :** ]]..getCount(10084)..[[\n<:NerdHair:1136675648899911851> **Nerd Hair :** ]]..getCount(12502)..[[\n<:TreeDeco:1136675561578713199> **Tree Decorations :** ]]..getCount(3204)..[[",
+                "inline": true
+            },
+            {
+                "name": "[Good Items]",
+                "value": "<:GCharger:1136676721928704010> **Geiger Charger :** ]]..getCount(4654)..[[\n<:DBattery:1136676755269222520> **D Battery :** ]]..getCount(3306)..[[\n<:BCrystal:1136677044672012298> **Black Crystal :** ]]..getCount(2250)..[[\n<:WCrystal:1136677002754134057> **White Crystal :** ]]..getCount(2248)..[[\n<:BLCrystal:1136676911561580714> **Blue Crystal :** ]]..getCount(2246)..[[\n<:RCrystal:1136676963898101901> **Red Crystal :** ]]..getCount(2242)..[[\n<:GCrystal:1136676868280557719> **Green Crystal :** ]]..getCount(2244)..[[",
+                "inline": true
+            },
+            {
+                "name": "[Estimated Profit]",
+                "value": "]]..DL..[[ <:diamong:1136941075513233418> ]]..WL..[[ <:wls:1135109229812924446>"
+            }
+            ],
+            "footer": {
+            "text": "Marr's Script | ]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[[",
+            "icon_url": "https://i.ibb.co/5nsZxb6/Marr-script-1.png"
+            }
+        }],
+        "username": "Storage Logs",
+        "avatar_url": "https://i.ibb.co/5nsZxb6/Marr-script-1.png",
+        "attachments": []
+    }]]
+
+    RequestINFO = {}
+    RequestINFO.url = webhookStorageUrl.."/messages/"..msgid
+    RequestINFO.method = PATCH
+    RequestINFO.json = true
+    RequestINFO.postData = script
+    x = httpReq(RequestINFO)
+end
+
+function countProfit()
+    local count = 0
+    if storageList[4654] then
+        count = count + (storageList[4654] * 60)
+    end
+    sleep(200)
+    if storageList[3306] then
+        count = count + (storageList[3306] * 2)
+    end
+    sleep(200)
+    if storageList[2250] then
+        count = count + (storageList[2250] * 55)
+    end
+    sleep(200)
+    if storageList[2248] then
+        count = count + (storageList[2248] * 45)
+    end
+    sleep(200)
+    if storageList[2246] then
+        count = count + (storageList[2246] * 1)
+    end
+    sleep(200)
+    if storageList[2242] then
+        count = count + (storageList[2242] * 1)
+    end
+    sleep(200)
+    if storageList[2244] then
+        count = count + (storageList[2244] * 1)
+    end
+    sleep(500)
+    return count
+end
+
+function scanStorage()
+    for i, obj in pairs(bot:getObjects()) do
+        if storageList[obj.id] then
+            storageList[obj.id] = storageList[obj.id] + obj.count
+        else
+            storageList[obj.id] = obj.count
+        end
+    end
+end
+
+function getCount(id)
+    for key,itm in pairs(storageList) do
+        if key == id then
+            return itm
+        end
+    end
+    return 0
+end
+
+function getPosX()
+    return math.floor(bot:getLocal().pos.x/32)
+end
+
+function getPosY()
+    return math.floor(bot:getLocal().pos.y/32)
+end
+
+function bStatus()
+    return bot:getBotStatus()
+end
+
+function eStatus()
+    return bot:getEnetStatus()
+end
+
+function getSignal()
+    sleep(250)
+    local find = bot:getSignal()
+    if find == RED then
+        return 1
+    elseif find == YELLOW then
+        return 2
+    elseif find == GREEN then
+        return 3
+    elseif find == RAPIDGREEN then
+        return 4
+    else
+        return 0
+    end
+end
+
+function searchGreen()
+    local mx,my = getPosX(), getPosY()
+
+    while getPosY() >= 0 do
+        local midx1,midy1 = getPosX(), getPosY()
+        while true do
+            if bot:findPath(getPosX() + 4, getPosY()) then
+                sleep(250)
+            else
+                if bot:findPath(midx1,midy1) then
+                    sleep(500)
+                end
+                break
+            end
+            if getSignal() > 2 then
+                return
+            elseif getSignal() < 2 then
+                if bot:findPath(midx1,midy1) then
+                    sleep(500)
+                end
+                break
+            end
+        end
+        while true do
+            if bot:findPath(getPosX() - 4, getPosY()) then
+                sleep(250)
+            else
+                if bot:findPath(midx1,midy1) then
+                    sleep(500)
+                end
+                break
+            end
+            if getSignal() > 2 then
+                return
+            elseif getSignal() < 2 then
+                if bot:findPath(midx1,midy1) then
+                    sleep(500)
+                end
+                break
+            end
+        end
+        sleep(250)
+        if getPosY() == 0 then
+            if bot:findPath(mx,my + 4) then
+                sleep(1000)
+            end
+            break
+        else
+            if bot:findPath(midx1,midy1 - 4) then
+                sleep(500)
+                if getSignal() < 2 then
+                    if bot:findPath(mx,my + 4) then
+                        sleep(1000)
+                    end
+                    break
+                end
+            else
+                if bot:findPath(mx,my + 4) then
+                    sleep(1000)
+                end
+                break
+            end
+        end
+    end
+
+    sleep(500)
+    while getPosY() <= 53 do
+        local midx2,midy2 = getPosX(), getPosY()
+        while true do
+            if bot:findPath(getPosX() + 4, getPosY()) then
+                sleep(250)
+            else
+                if bot:findPath(midx2,midy2) then
+                    sleep(500)
+                end
+                break
+            end
+            if getSignal() > 2 then
+                return
+            elseif getSignal() < 2 then
+                if bot:findPath(midx2,midy2) then
+                    sleep(500)
+                end
+                break
+            end
+        end
+        while true do
+            if bot:findPath(getPosX() - 4, getPosY()) then
+                sleep(250)
+            else
+                if bot:findPath(midx2,midy2) then
+                    sleep(500)
+                end
+                break
+            end
+            if getSignal() > 2 then
+                return
+            elseif getSignal() < 2 then
+                if bot:findPath(midx2,midy2) then
+                    sleep(500)
+                end
+                break
+            end
+        end
+        sleep(250)
+        if getPosY() == 53 then
+            break
+        else
+            if bot:findPath(midx2,midy2 + 4) then
+                sleep(250)
+                if getSignal() < 2 then
+                    break
+                end
+            else
+                break
+            end
+        end
+    end
+end
+
+function searchRapid()
+    local mx2,my2 = getPosX(), getPosY()
+
+    while getPosY() >= 0 do
+        local midx3,midy3 = getPosX(), getPosY()
+        while true do
+            if bot:findPath(getPosX() + 2, getPosY()) then
+                sleep(500)
+            else
+                if bot:findPath(midx3,midy3) then
+                    sleep(500)
+                end
+                break
+            end
+            if getSignal() > 3 then
+                return
+            elseif getSignal() < 3 then
+                if bot:findPath(midx3,midy3) then
+                    sleep(500)
+                end
+                break
+            end
+        end
+        while true do
+            if bot:findPath(getPosX() - 2, getPosY()) then
+                sleep(500)
+            else
+                if bot:findPath(midx3,midy3) then
+                    sleep(500)
+                end
+                break
+            end
+            if getSignal() > 3 then
+                return
+            elseif getSignal() < 3 then
+                if bot:findPath(midx3,midy3) then
+                    sleep(500)
+                end
+                break
+            end
+        end
+        sleep(250)
+        if getPosY() == 0 then
+            if bot:findPath(mx2,my2 + 2) then
+                sleep(1000)
+            end
+            break
+        else
+            if bot:findPath(midx3,midy3 - 2) then
+                sleep(500)
+                if getSignal() < 3 then
+                    if bot:findPath(mx2,my2 + 2) then
+                        sleep(1000)
+                    end
+                    break
+                end
+            else
+                if bot:findPath(mx2,my2 + 2) then
+                    sleep(1000)
+                end
+                break
+            end
+        end
+    end
+
+    sleep(500)
+    while math.floor(bot:getLocal().pos.y/32) <= 53 do
+        local midx4,midy4 = getPosX(), getPosY()
+        while true do
+            if bot:findPath(getPosX() + 2, getPosY()) then
+                sleep(500)
+            else
+                if bot:findPath(midx4,midy4) then
+                    sleep(500)
+                end
+                break
+            end
+            if getSignal() > 3 then
+                return
+            elseif getSignal() < 3 then
+                if bot:findPath(midx4,midy4) then
+                    sleep(500)
+                end
+                break
+            end
+        end
+        while true do
+            if bot:findPath(getPosX() - 2, getPosY()) then
+                sleep(500)
+            else
+                if bot:findPath(midx4,midy4) then
+                    sleep(500)
+                end
+                break
+            end
+            if getSignal() > 3 then
+                return
+            elseif getSignal() < 3 then
+                if bot:findPath(midx4,midy4) then
+                    sleep(500)
+                end
+                break
+            end
+        end
+        sleep(500)
+        if getPosY() == 0 then
+            break
+        else
+            if bot:findPath(midx4,midy4 + 2) then
+                sleep(1000)
+                if getSignal() < 3 then
+                    break
+                end
+            else
+                break
+            end
+        end
+    end
+end
+
+function searchPrize()
+    local mx3,my3 = getPosX(), getPosY()
+
+    while getPosY() >= 0 do
+        local midx5,midy5 = getPosX(), getPosY()
+        while true do
+            if bot:findPath(getPosX() + 1, getPosY()) then
+                sleep(1000)
+            else
+                if bot:findPath(99,getPosY()) then
+                    sleep(1000)
+                end
+            end
+            if not bot:isEquipped(2204) then
+                return
+            elseif getSignal() < 4 then
+                if bot:findPath(midx5,midy5) then
+                    sleep(1000)
+                end
+                break
+            elseif getPosX() == 99 then
+                if bot:findPath(midx5,midy5) then
+                    sleep(1000)
+                end
+                break
+            end
+        end
+        while true do
+            if bot:findPath(getPosX() - 1, getPosY()) then
+                sleep(1000)
+            else
+                if bot:findPath(0,getPosY()) then
+                    sleep(1000)
+                end
+                break
+            end
+            if not bot:isEquipped(2204) then
+                return
+            elseif getSignal() < 4 then
+                if bot:findPath(midx5,midy5) then
+                    sleep(1000)
+                end
+                break
+            elseif getPosX() == 0 then
+                if bot:findPath(midx5,midy5) then
+                    sleep(1000)
+                end
+                break
+            end
+        end
+        if getPosY() == 0 then
+            if bot:findPath(mx3,my3 + 1) then
+                sleep(1500)
+            end
+            break
+        else
+            if bot:findPath(midx5,midy5 - 1) then
+                sleep(1500)
+                if getSignal() < 4 then
+                    if bot:findPath(mx3,my3 + 1) then
+                        sleep(1500)
+                    end
+                    break
+                end
+            else
+                if bot:findPath(mx3,my3 + 1) then
+                    sleep(1500)
+                end
+                break
+            end
+        end
+    end
+
+    sleep(500)
+    while getPosY() <= 53 do
+        local midx6,midy6 = getPosX(), getPosY()
+        while true do
+            if bot:findPath(getPosX() + 1, getPosY()) then
+                sleep(1000)
+            else
+                if bot:findPath(99,getPosY()) then
+                    sleep(1000)
+                end
+                break
+            end
+            if not bot:isEquipped(2204) then
+                return
+            elseif getSignal() < 4 then
+                if bot:findPath(midx6,midy6) then
+                    sleep(1000)
+                end
+                break
+            elseif getPosX() == 99 then
+                if bot:findPath(midx6,midy6) then
+                    sleep(1000)
+                end
+                break
+            end
+        end
+        while true do
+            if bot:findPath(getPosX() - 1, getPosY()) then
+                sleep(1000)
+            else
+                if bot:findPath(0,getPosY()) then
+                    sleep(1000)
+                end
+                break
+            end
+            if not bot:isEquipped(2204) then
+                return
+            elseif getSignal() < 4 then
+                if bot:findPath(midx6,midy6) then
+                    sleep(1000)
+                end
+                break
+            elseif getPosX() == 0 then
+                if bot:findPath(midx6,midy6) then
+                    sleep(1000)
+                end
+                break
+            end
+        end
+        sleep(500)
+        if getPosY() == 0 then
+            break
+        else
+            if bot:findPath(midx6,midy6 + 1) then
+                sleep(1500)
+                if getSignal() < 4 then
+                    break
+                end
+            else
+                break
+            end
+        end
+    end
+end
+
+function searchOrder()
+    sleep(500)
+    if getSignal() == 2 then
+        searchGreen()
+    end
+    sleep(500)
+    if getSignal() == 3 then
+        searchRapid()
+    end
+    sleep(500)
+    if getSignal() ==  4 then
+        searchPrize()
+    end
+end
+
+function checkBlock(index)
+    local ex = firstLayer[index].x
+    local ye = firstLayer[index].y
+
+    if index == 2 or index == 5 then
+        for _,v in pairs(secondLayer2) do
+            if bot:findPath(ex + v.x, ye + v.y) then
+                sleep(1000)
+                if getSignal() > 1 then
+                    searchOrder()
+                    return
+                end
+            end
+        end
+    else
+        for _,v in pairs(secondLayer1) do
+            if bot:findPath(ex + v.x, ye + v.y) then
+                sleep(1000)
+                if getSignal() > 1 then
+                    searchOrder()
+                    return
+                end
+            end
+        end
+    end
+end
+
+function startSearch()
+    t = os.time()
+    while true do
+        for i,tile in pairs(firstLayer) do
+            if bot:findPath(tile.x,tile.y) then
+                sleep(1000)
+                log(string.format("(%s,%s) => signal: %s", tile.x, tile.y, getSignal()))
+                if getSignal() > startSignal then
+                    checkBlock(i)
+                end
+                if not bot:isEquipped(2204) then
+                    break
+                end
+            end
+        end
+        if ((os.time()-t)%3600)/60 > 5 then
+            logMsg("Can't  find item within 5 minutes, reconnect")
+            bot:disconnect()
+            sleep(5000)
+            reconInfo()
+            connect()
+            reconInfo()
+            t = os.time()
+        else
+            if not bot:isEquipped(2204) then
+                break
+            else
+                sleep(5000)
+            end
+        end
+    end
+    te = os.time() - t
+    logMsg(getFoundItem())
+    sleep(500)
+    logs("Time Elapsed: "..math.floor((te % 3600) / 60).." Minutes "..(te % 60).." Seconds")
+    charging = true
+end
+
+function checkTable(tbl)
+    if tbl.x and tbl.y then
+        coordinateDrop = true
+    elseif tbl.good and tbl.bad then
+        coordinateDrop = false
+    else
+        log("storage_pos not valid, check example in server\n")
+        stopScirpt = true
+        return
+    end
+end
+
+function checkOwnerTable(tbl, value)
+    for i, data in pairs(tbl) do
+        if string.upper(data) == string.upper(value) then
+            return true
+        end
+    end
+    return false
+end
+
+function round(n)
+    return n % 1 > 0.5 and math.ceil(n) or math.floor(n)
+end
+
+function collect(range, itemId)
+    for _, object in pairs(bot:getObjects()) do
+        local posX = math.floor(object.pos.x / 32)
+        local posY = math.floor(object.pos.y / 32)
+        if bot:isInside(posX, posY, range) then
+            if itemId == nil or object.id == itemId then
+                bot:collectObject(object.uid)
+            end
+        end
+    end
+end
+
+function faceSide(direction)
+    local packet = {}
+    packet.type = 0
+    if direction == "left" then
+        packet.flags = 48
+    elseif direction == "right" then
+        packet.flags = 32
+    end
+    packet.pos_x = bot:getLocal().pos.x
+    packet.pos_y = bot:getLocal().pos.y
+    bot:sendPacketRaw(packet)
+end
+
+function take()
+    sleep(500)   
+    bot:autoCollect(2,false)
+    sleep(500)
+    warp(takeGeigerWorld,takeGeigerDoor)
+    sleep(500)
+    while bot:getItemCount(2204) == 0 do
+        while true do
+            for _,obj in pairs(bot:getObjects()) do
+                if obj.id == 2204 then
+                    if bot:findPath(round(obj.pos.x/32) - 1, math.floor(obj.pos.y/32)) then
+                        sleep(1000)
+                    end
+                    collect(2)
+                    sleep(1000)
+                end
+            end
+            if bot:getItemCount(2204) > 0 then
+                break
+            end
+            sleep(5000)
+        end
+    end
+    sleep(1000)
+    while not bot:isEquipped(2204) do
+        wear(2204)
+        sleep(2000)
+    end
+    if bot:getItemCount(2204) > 1 then
+        bot:autoCollect(2,false)
+        sleep(500)
+        faceSide("right")
+        sleep(1500)
+        bot:drop(2204, bot:getItemCount(2204)-1)
+        sleep(1500)
+    end
+    sleep(500)
+end
+
+function checkGeiger()
+    if bot:isEquipped(2204) then
+       return 
+    end
+    if bot:getItemCount(2204) > 0 then
+        while not bot:isEquipped(2204) do
+            wear(2204)
+            sleep(2000)
+        end
+        return
+    end
+    if bot:getItemCount(2286) > 0 then
+        sleep(1000)
+        tele(geigerWorld,geigerDoor)
+        charging = true
+        return
+    end
+    if not takeGeiger then
+        stopScirpt = true
+        logs("There are no geiger in inventory, you might want to turn on takeGeiger")
+        return
+    end
+    while not bot:isEquipped(2204) do
+        take()
+    end
+end
+
+function checkMultibot()
+    local count = 0
+    for key,data in pairs(botSettings) do
+        if string.upper(data.geigerWorld) == string.upper(geigerWorld) then
+            count = count + 1
+            table.insert(duplicateLine, key)
+        end
+    end
+
+    if count > 1 then 
+        multiBot = true
+    end
+end
+
+function punch(x,y)
+    local player = bot:getLocal()
+    return bot:hitTile(math.floor(player.pos.x/32) + x, math.floor(player.pos.y/32) + y)
+end
+
+function ToxicWaste()
+    wasteTiles = {}
+
+    for _,tile in ipairs(bot:getTiles()) do
+        if tile.fg == 778 or tile.bg == 778 then
+            table.insert(wasteTiles, {x = tile.x, y = tile.y})
+        end
+    end
+
+    if #wasteTiles > 0 then
+        logs("Clearing Toxic Waste")
+        while #wasteTiles > 0 do
+            for key,tile in pairs(wasteTiles) do
+                if bot:findPath(tile.x,tile.y+1) then
+                    sleep(500)
+                    punch(0,-1)
+                    sleep(1000)
+                    table.remove(wasteTiles, key)
+                elseif bot:findPath(tile.x,tile.y-1) then
+                    sleep(500)
+                    punch(0,1)
+                    sleep(1000)
+                    table.remove(wasteTiles, key)
+                elseif bot:findPath(tile.x+1,tile.y) then
+                    sleep(500)
+                    punch(-1,0)
+                    sleep(1000)
+                    table.remove(wasteTiles, key)
+                elseif bot:findPath(tile.x-1,tile.y) then
+                    sleep(500)
+                    punch(1,0)
+                    sleep(1000)
+                    table.remove(wasteTiles, key)
+                end
+            end
+        end
+        logs("Done Clearing Toxic Waste")
+    end
+end
+
+function reserveItems()
+    for _,itm in pairs(bot:getInventory()) do
+        table.insert(goods, {ids = itm.id, jumlah = itm.count})
+        sleep(100)
+    end
+end
+
+function main()
+    goods = {}
+
+    checkGeiger()
+    if stopScript or charging then
+        return
+    end
+
+    warp(geigerWorld,geigerDoor)
+
+    if multiBot then
+        for _,player in pairs(duplicateLine) do
+            if not getBot(player):isEquipped(2204) then
+                while getBot(player):getItemCount(2204) == 0 and getBot(player):getItemCount(2286) == 0 do
+                    sleep(2000)
+                end
+            end
+        end
+
+        for ko,bo in pairs(duplicateLine) do
+            if string.upper(bo) == string.upper(getBot():getLocal().name) then
+                break
+            end
+            if string.upper(bo) ~= string.upper(getBot():getLocal().name) then
+                while getBot(bo):getItemCount(2286) == 0 do
+                    sleep(2000)
+                end
+            end
+        end
+    end
+
+    ToxicWaste()
+    reserveItems()
+    startSearch()
+end
+
+function isIncluded(element, table)
+    for _,itm in pairs(table) do
+        if element == itm.ids then
+            return true
+        end
+    end
+    return false
+end
+
+function isChanged(idnya, jumlahnya, table)
+    for _,itm in pairs(table) do
+        if idnya == itm.ids then
+            if jumlahnya == itm.jumlah then
+                return false
+            else
+                return true
+            end
+        end
+    end
+end
+
+function countChanged(idnya, table)
+    for _,itm in pairs(table) do
+        if idnya == itm.ids then
+            return bot:getItemCount(idnya) - itm.jumlah
+        end
+    end
+end
+
+function getFoundItem()
+    for _,itm in pairs(bot:getInventory()) do
+        if itm.id == 2286 then
+            sleep(50)
+        else
+            if not isIncluded(itm.id, goods) or isChanged(itm.id, itm.count, goods) then
+                local nama = getItemInfo(itm.id).name
+                local jumlah = countChanged(itm.id, goods) or bot:getItemCount(itm.id)
+                return string.format("Found Item:  %s (x%s)", nama, jumlah)
+            end
+        end
+    end
+	return "can't determine found items"
+end
+
+function wear(id)
+    local packet = {}
+    packet.type = 10
+    packet.int_data = id
+    bot:sendPacketRaw(packet)
+end
+
+function logMsg(message)   
+    log(string.format("[%s] %s \n", bot:getLocal().name, message))
+    if webhookEnabled then
+        sendWebhook(message)
+    end
+end 
+
+function logs(message)
+    log(string.format("[%s] %s \n", bot:getLocal().name, message))
+end
+
+function getEnetStatus()
+    local status
+    local botStatus = bot:getEnetStatus()
+    if botStatus == Disconnected then
+        status = "Disconnected"
+    elseif botStatus == Connected then
+        status = "Connected"
+    elseif botStatus == ShadowBan then
+        status = "Shadow Ban"
+    end
+    return status
+end
+
+function reconInfo()
+    ut = os.time() - tt
+    if getEnetStatus() == "Disconnected" then
+        color = 9242129
+    elseif getEnetStatus() == "Connected" then
+        color = 756998
+    end
+
+    local script = [[
+        {
+            "content": "@everyone",
+            "embeds": [
+              {
+                "title": "[]]..string.lower(bot:getLocal().name)..[[] status is ]]..getEnetStatus()..[[",
+                "color": ]]..color..[[,
+                "footer": {
+                    "text": "Bot Uptime: ]]..math.floor(ut/86400)..[[ Day ]]..math.floor(ut%86400/3600)..[[ Hour ]]..math.floor(ut%86400%3600/60)..[[ Minute \nMarr's Script | ]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[["
+                }
+              }
+            ],
+            "username": "Status Logs",
+            "avatar_url": "https://i.ibb.co/5nsZxb6/Marr-script-1.png",
+            "attachments": []
+        }
+    ]]
+
+    RequestINFO={}
+    RequestINFO.url = webhookStatusUrl
+    RequestINFO.method = POST
+    RequestINFO.json = true
+    RequestINFO.postData = script
+    x = httpReq(RequestINFO)
+end
+
+function sendWebhook(text)
+    ut = os.time() - tt
+    local script = [[
+        {
+            "content": null,
+            "embeds": [
+              {
+                "title": "]]..string.lower(getBot():getLocal().name)..[[ [||]]..bot:getCurrentWorld()..[[||]",
+                "description": "]]..text..[[",
+                "color": 1005735,
+                "footer": {
+                  "text": "Bot Uptime: ]]..math.floor(ut/86400)..[[ Day ]]..math.floor(ut%86400/3600)..[[ Hour ]]..math.floor(ut%86400%3600/60)..[[ Minute \nMarr's Script | ]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[["
+                }
+              }
+            ],
+            "username": "Auto Geiger Logs",
+            "avatar_url": "https://i.ibb.co/5nsZxb6/Marr-script-1.png",
+            "attachments": []
+        }]]
+
+    RequestINFO = {}
+    RequestINFO.url = webhookUrl
+    RequestINFO.method = POST
+    RequestINFO.json = true
+    RequestINFO.postData = script
+    x = httpReq(RequestINFO)
+end
+
+function tileDrop(x,y,num)
+    local count = 0
+    local stack = 0
+    for _,obj in pairs(bot:getObjects()) do
+        if math.floor(obj.pos.x / 32) == x and math.floor(obj.pos.y / 32) == y then
+            count = count + obj.count
+            stack = stack + 1
+        end
+    end
+    if stack < 20 and count <= (4000 - num) then
+        return true
+    end
+    return false
+end
+
+function drop(id, count)
+    if count == nil then
+        count = bot:getItemCount(id)
+    end
+    bot:sendPacket("action|drop\n|itemID|"..id, 2)
+    bot:sendPacket("action|dialog_return\ndialog_name|drop_item\nitemID|"..id.."|\ncount|"..count, 2)
+    sleep(1000)
+end
+
+function dropCoord()
+    sleep(2000)
+    local changer
+    local arah
+
+    for _,itm in pairs(dropList) do
+        if itm.tipe == "good" then
+            changer = 1
+            arah = "right"
+        else
+            changer = -1
+            arah = "left"
+        end
+        sleep(500)
+        while getPosX() ~= storagePos.x or getPosY() ~= storagePos.y do
+            if bot:findPath(storagePos.x, storagePos.y) then
+                sleep(1500)
+            end
+            if eStatus() ~= Connected then
+                return
+            end
+        end
+
+        while bot:getItemCount(itm.id) > 0 do
+            if tileDrop(storagePos.x + changer, getPosY(), bot:getItemCount(itm.id)) then
+                faceSide(arah)
+                logMsg(string.format("Dropping Reward: %ix %s", bot:getItemCount(itm.id), getItemInfo(itm.id).name))
+                sleep(1500)
+                while bot:getItemCount(itm.id) > 0 and tileDrop(storagePos.x + changer, getPosY(), bot:getItemCount(itm.id)) do 
+                    drop(itm.id)
+                    sleep(1500)
+                end
+            else
+                bot:move(UP,1)
+                sleep(2000)
+                if eStatus() ~= Connected then
+                    return
+                end
+            end
+        end
+    end
+end
+
+function dropBlockId()
+    sleep(2000)
+    local posDrop
+
+    for _,itm in pairs(dropList) do
+        if itm.tipe == "good" then
+            posDrop = storagePos.good
+        else
+            posDrop = storagePos.bad
+        end
+        sleep(500)
+        for _,tile in ipairs(bot:getTiles()) do
+            if tile.fg == posDrop or tile.bg == posDrop then
+                if tileDrop(tile.x, tile.y, bot:getItemCount(itm.id)) then
+                    while getPosX() ~= (tile.x + 1) or getPosY() ~= tile.y do
+                        if bot:findPath(tile.x + 1, tile.y) then
+                            sleep(1500)
+                        end
+                        if eStatus() ~= Connected then
+                            return
+                        end
+                    end
+                    faceSide("left")
+                    logMsg(string.format("Dropping Reward: %ix %s", bot:getItemCount(itm.id), getItemInfo(itm.id).name))
+                    sleep(1500)
+                    while bot:getItemCount(itm.id) > 0 and tileDrop(tile.x, tile.y, bot:getItemCount(itm.id)) do
+                        drop(itm.id)
+                        sleep(1500)
+                    end
+                end
+            end
+            if bot:getItemCount(itm.id) == 0 then
+                break
+            end
+        end
+    end
+end
+
+function dropItem()
+    bot:autoCollect(2,false)
+    local perubah
+    local arahnya
+
+    if customStorage then
+        warp(storageWorld,storageDoor)
+        if not coordinateDrop then
+            dropBlockId()
+            if eStatus() ~= Connected then
+                return
+            end
+        else
+            dropCoord()
+            if estatus() ~= Connected then
+                return
+            end
+        end
+        sleep(1500)
+        sendStorage(strID)
+        sleep(1500)
+        dropList = {}
+        warp(geigerWorld,geigerDoor)
+        return
+    end
+
+    if not customStorage then
+        warp(geigerWorld,geigerDoor)
+
+        for _,itm in pairs(dropList) do
+            if itm.tipe == "good" then
+                perubah = 1
+                arahnya = "right"
+            else
+                perubah = -1
+                arahnya = "left"
+            end
+            sleep(500)
+            while getPosX() ~= 45 or getPosY() ~= 53 do
+                if bot:findPath(45,53) then
+                    sleep(1500)
+                end
+                if eStatus() ~= Connected then
+                    return
+                end
+            end
+
+            while bot:getItemCount(itm.id) > 0 do
+                if tileDrop(45 + perubah, getPosY(), bot:getItemCount(itm.id)) then
+                    faceSide(arahnya)
+                    logMsg(string.format("Dropping Reward: %ix %s", bot:getItemCount(itm.id), getItemInfo(itm.id).name))
+                    sleep(1500)
+                    while bot:getItemCount(itm.id) > 0 and tileDrop(45 + perubah, getPosY(), bot:getItemCount(itm.id)) do
+                        drop(itm.id)
+                        sleep(1500)
+                    end
+                else
+                    bot:move(UP,1)
+                    sleep(2000)
+                    if eStatus() ~= Connected then
+                        return
+                    end
+                end
+            end
+        end
+        sleep(1500)
+        sendStorage(strID)
+        sleep(1500)
+        dropList = {}
+    end
+end
+
+function checkInventory()
+    for i, bagus in pairs(GOODIES) do
+        if bot:getItemCount(bagus) > 0 then
+            table.insert(dropList, {id = bagus, tipe = "good"})
+        end
+        sleep(100)
+    end
+    sleep(500)
+    for j, jelek in pairs(BADS) do
+        if bot:getItemCount(jelek) > 0 then
+            table.insert(dropList, {id = jelek, tipe = "bad"})
+        end
+        sleep(100)
+    end
+end
+
+function warp(to, id)
+    while string.upper(bot:getWorld().name) ~= string.upper(to) do
+        bot:sendPacket("action|join_request\nname|"..string.upper(to).."\ninvitedWorld|0",3)
+        sleep(warpDelay)
+    end
+    if id == "" or id == nil then
+        return
+    end
+    while bot:getTile(math.floor(bot:getLocal().pos.x/32), math.floor(bot:getLocal().pos.y/32)).fg == 6 do
+        bot:sendPacket("action|join_request\nname|"..string.upper(to).."|"..string.upper(id).."\ninvitedWorld|0",3)
+        sleep(warpDelay)
+    end
+end
+
+function chargeGeiger()
+    if bot:findPath(bot:getWorld().maindoor.x, bot:getWorld().maindoor.y) then
+        sleep(1000)
+    end
+    if eStatus() ~= Connected then
+        reconInfo()
+        connect()
+        reconInfo()
+    end
+
+    logs("Charging Geiger")
+    while bot:getItemCount(2204) == 0 and bot:getItemCount(2286) > 0 do
+        sleep(20000)
+        if eStatus() ~= Connected then
+            reconInfo()
+            connect()
+            reconInfo()
+        end
+        if bot:getItemCount(2204) > 0 then
+            break
+        end
+    end
+end
+
+function processAutoGeiger()
+    sleep(2000)
+    checkInventory()
+    if #dropList > 0 then
+        sleep(2000)
+        dropItem()
+        return
+    end
+    if charging then
+        chargeGeiger()
+        charging = false
+        return
+    end
+    main()
+    sleep(2000)
+end
+
+function contains(table, value)
+    for i, element in pairs(table) do
+        if element == value then
+            return true
+        end
+    end
+    return false
+end
+
+function isValid()
+    local validStatusList = {
+        Disconnected,
+        Connected,
+        Update_Required,
+        Maintenance,
+        SERVER_OVERLOADED,
+        OnSendToServer,
+        LogonATTEMPTS,
+        Success
+    }
+
+    return contains(validStatusList, bot:getBotStatus())
+end
+
+function connect()
+    while true do
+        while bot:getEnetStatus() ~= Connected do
+            bot:reConnect()
+            sleep(30000)
+            if not isValid() then
+                while true do
+                    sleep(10000)
+                end
+            end
+        end
+        if bStatus() == Success then
+            break
+        else
+            bot:disconnect()
+            sleep(10000)
+        end
+    end
+end
+
+function searchOwner()
+    warp(worldOwner)
+    sleep(500)
+    bot:say("Waiting for `2owner")
+    sleep(3500)
+    while not foundOwner do
+        for _,ply in pairs(bot:getPlayers()) do
+            local ncok = ply.name:match("`%g([%w]+)``")
+            if checkOwnerTable(owner, ncok) then
+                bot:say("`2"..ncok.." `0Found")
+                sleep(200)
+                bot:say("Starting script")
+                sleep(5000)
+                foundOwner = true
+            end
+            sleep(500)
+        end
+        sleep(500)
+    end
+end
+
+function autoGeiger()
+    geigerWorld =  botSettings[string.upper(getBot():getLocal().name)].geigerWorld
+    geigerDoor = botSettings[string.upper(getBot():getLocal().name)].geigerDoor
+    strID = botSettings[string.upper(getBot():getLocal().name)].storageMessageId
+
+    if botSettings[string.upper(getBot():getLocal().name)].storageWorld ~= "" then
+        customStorage = true
+        storageWorld = botSettings[string.upper(getBot():getLocal().name)].storageWorld
+        storageDoor = botSettings[string.upper(getBot():getLocal().name)].storageDoor
+        checkTable(storagePos)
+    end
+
+    if stopScript then
+        return
+    end
+
+    searchOwner()
+
+    tt = os.time()
+    logs("Started")
+    while isValid() do
+        if bot:getEnetStatus() == Connected then
+            processAutoGeiger()
+            if stopScript then
+                return
+            end
+        else
+            reconInfo()
+            connect()
+            reconInfo()
+        end
+    end
+end
+
+autoGeiger()
