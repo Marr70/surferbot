@@ -581,7 +581,6 @@ function startSearch()
         for i,tile in pairs(firstLayer) do
             if bot:findPath(tile.x,tile.y) then
                 sleep(1000)
-                log(string.format("(%s,%s) => signal: %s", tile.x, tile.y, getSignal()))
                 if getSignal() > startSignal then
                     checkBlock(i)
                 end
@@ -1261,7 +1260,6 @@ function connect()
 end
 
 function searchOwner()
-    logs("Searching for Owner")
     warp(worldOwner)
     sleep(500)
     bot:say("Waiting for `2owner")
@@ -1293,6 +1291,8 @@ function autoGeiger()
         storageDoor = botSettings[string.upper(getBot():getLocal().name)].storageDoor
         checkTable(storagePos)
     end
+
+    checkMultibot()
 
     if stopScript then
         return
