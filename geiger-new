@@ -1294,6 +1294,7 @@ function autoGeiger()
         checkTable(storagePos)
     end
 
+    logs("LOL")
     if stopScript then
         return
     end
