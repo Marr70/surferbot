@@ -179,7 +179,7 @@ function searchGreen()
         local midx1,midy1 = getPosX(), getPosY()
         while true do
             if bot:findPath(getPosX() + 4, getPosY()) then
-                sleep(250)
+                sleep(500)
             else
                 if bot:findPath(midx1,midy1) then
                     sleep(500)
@@ -200,7 +200,7 @@ function searchGreen()
         end
         while true do
             if bot:findPath(getPosX() - 4, getPosY()) then
-                sleep(250)
+                sleep(500)
             else
                 if bot:findPath(midx1,midy1) then
                     sleep(500)
@@ -219,7 +219,7 @@ function searchGreen()
                 break
             end
         end
-        sleep(250)
+        sleep(500)
         if getPosY() == 0 then
             if bot:findPath(mx,my + 4) then
                 sleep(1000)
@@ -252,7 +252,7 @@ function searchGreen()
         local midx2,midy2 = getPosX(), getPosY()
         while true do
             if bot:findPath(getPosX() + 4, getPosY()) then
-                sleep(250)
+                sleep(500)
             else
                 if bot:findPath(midx2,midy2) then
                     sleep(500)
@@ -273,7 +273,7 @@ function searchGreen()
         end
         while true do
             if bot:findPath(getPosX() - 4, getPosY()) then
-                sleep(250)
+                sleep(500)
             else
                 if bot:findPath(midx2,midy2) then
                     sleep(500)
@@ -292,7 +292,7 @@ function searchGreen()
                 break
             end
         end
-        sleep(250)
+        sleep(500)
         if getPosY() == 53 then
             break
         else
@@ -356,7 +356,7 @@ function searchRapid()
                 break
             end
         end
-        sleep(250)
+        sleep(500)
         if getPosY() == 0 then
             if bot:findPath(mx2,my2 + 2) then
                 sleep(1000)
@@ -1269,6 +1269,9 @@ function warp(to, id)
     while string.upper(bot:getWorld().name) ~= string.upper(to) do
         bot:sendPacket("action|join_request\nname|"..string.upper(to).."\ninvitedWorld|0",3)
         sleep(warpDelay)
+        if eStatus ~= Connected then
+            return
+        end
     end
     if id == "" or id == nil then
         return
@@ -1276,6 +1279,9 @@ function warp(to, id)
     while bot:getTile(math.floor(bot:getLocal().pos.x/32), math.floor(bot:getLocal().pos.y/32)).fg == 6 do
         bot:sendPacket("action|join_request\nname|"..string.upper(to).."|"..string.upper(id).."\ninvitedWorld|0",3)
         sleep(warpDelay)
+        if eStatus ~= Connected then
+            return
+        end
     end
 end
 
