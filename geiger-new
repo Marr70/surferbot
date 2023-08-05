@@ -594,14 +594,14 @@ function searchOrder()
     if getSignal() == 2 then
         searchGreen()
     end
-    if eStatus ~= Connected then
+    if eStatus() ~= Connected then
         return
     end
     sleep(500)
     if getSignal() == 3 then
         searchRapid()
     end
-    if eStatus ~= Connected then
+    if eStatus() ~= Connected then
         return
     end
     sleep(500)
@@ -623,7 +623,7 @@ function checkBlock(index)
                     break
                 end
             end
-            if eStatus ~= Connected then
+            if eStatus() ~= Connected then
                 return
             end
         end
@@ -636,7 +636,7 @@ function checkBlock(index)
                     break
                 end
             end
-            if eStatus ~= Connected then
+            if eStatus() ~= Connected then
                 return
             end
         end
@@ -656,8 +656,7 @@ function startSearch()
                     break
                 end
             end
-            if eStatus ~= Connected then
-                logs("otl")
+            if eStatus() ~= Connected then
                 reconInfo()
                 connect()
                 reconInfo()
