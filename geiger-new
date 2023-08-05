@@ -808,7 +808,7 @@ function checkMultibot()
     for key,data in pairs(botSettings) do
         if string.upper(data.geigerWorld) == string.upper(geigerWorld) then
             count = count + 1
-            table.insert(duplicateLine, key)
+            duplicateLine[getBot(key):getIndex()] = key
         end
     end
 
@@ -1400,12 +1400,15 @@ function autoGeiger()
 
     checkMultibot()
 
-    if stopScript then
-        return
-    end
-
     if worldOwner ~= "marrscst" then
         searchOwner()
+    elseif worldOwner == nil then
+        logs("Cant find world owner")
+        stopScript = true
+    end
+
+    if stopScript then
+        return
     end
 
     tt = os.time()
