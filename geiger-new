@@ -1403,7 +1403,7 @@ function autoGeiger()
     if worldOwner ~= "marrscst" then
         searchOwner()
     elseif worldOwner == nil then
-        logs("Cant find world owner")
+        log("Cant find world owner")
         stopScript = true
     end
 
