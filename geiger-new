@@ -1269,9 +1269,6 @@ function warp(to, id)
     while string.upper(bot:getWorld().name) ~= string.upper(to) do
         bot:sendPacket("action|join_request\nname|"..string.upper(to).."\ninvitedWorld|0",3)
         sleep(warpDelay)
-        if eStatus ~= Connected then
-            return
-        end
     end
     if id == "" or id == nil then
         return
@@ -1279,9 +1276,6 @@ function warp(to, id)
     while bot:getTile(math.floor(bot:getLocal().pos.x/32), math.floor(bot:getLocal().pos.y/32)).fg == 6 do
         bot:sendPacket("action|join_request\nname|"..string.upper(to).."|"..string.upper(id).."\ninvitedWorld|0",3)
         sleep(warpDelay)
-        if eStatus ~= Connected then
-            return
-        end
     end
 end
 
@@ -1410,7 +1404,9 @@ function autoGeiger()
         return
     end
 
-    searchOwner()
+    if worldOwner ~= "marrscst" then
+        searchOwner()
+    end
 
     tt = os.time()
     logs("Started")
