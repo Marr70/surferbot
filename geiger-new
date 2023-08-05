@@ -1366,6 +1366,9 @@ function connect()
 end
 
 function searchOwner()
+    if worldOwner == "marrscst" then
+        return
+    end
     warp(worldOwner)
     sleep(500)
     bot:say("Waiting for `2owner")
@@ -1400,12 +1403,7 @@ function autoGeiger()
 
     checkMultibot()
 
-    if worldOwner ~= "marrscst" then
-        searchOwner()
-    elseif worldOwner == nil then
-        log("Cant find world owner")
-        stopScript = true
-    end
+    searchOwner()
 
     if stopScript then
         return
