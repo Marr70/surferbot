@@ -873,12 +873,12 @@ end
 function main()
     goods = {}
 
+    warp(geigerWorld,geigerDoor)
+
     checkGeiger()
     if stopScript or charging then
         return
     end
-
-    warp(geigerWorld,geigerDoor)
 
     if multiBot then
         for _,player in pairs(duplicateLine) do
