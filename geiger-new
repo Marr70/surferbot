@@ -40,7 +40,7 @@ function sendStorage(msgid)
     sleep(500)
     local profit = countProfit()
     local DL = math.floor(profit/100)
-    local WL = profit%100
+    local WL = limitDecimal(profit%100, 2)
 
     local script = [[
     {
@@ -86,6 +86,15 @@ function sendStorage(msgid)
     RequestINFO.json = true
     RequestINFO.postData = script
     x = httpReq(RequestINFO)
+end
+
+function limitDecimal(number, decimalPlaces)
+    if type(number) == "number" and number == math.floor(number) then
+        return number
+    end
+    
+    local multiplier = 10 ^ decimalPlaces
+    return math.floor(number * multiplier) / multiplier
 end
 
 function countProfit()
@@ -1291,7 +1300,7 @@ function chargeGeiger()
 
     logs("Charging Geiger")
     while bot:getItemCount(2204) == 0 and bot:getItemCount(2286) > 0 do
-        sleep(20000)
+        sleep(10000)
         if eStatus() ~= Connected then
             reconInfo()
             connect()
