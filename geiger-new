@@ -1401,8 +1401,9 @@ function autoGeiger()
         checkTable(storagePos)
     end
 
+    log('eh')
     checkMultibot()
-
+    log("mkmk")
     searchOwner()
 
     if stopScript then
