@@ -804,7 +804,6 @@ function checkGeiger()
 end
 
 function checkMultibot()
-    log("bang")
     local count = 0
     for key,data in pairs(botSettings) do
         if string.upper(data.geigerWorld) == string.upper(geigerWorld) then
@@ -1367,10 +1366,10 @@ function connect()
 end
 
 function searchOwner()
-    log("Searching Owner")
     if worldOwner == "marrscst" then
         return
     end
+    logs("Searching Owner")
     warp(worldOwner)
     sleep(500)
     bot:say("Waiting for `2owner")
@@ -1405,11 +1404,11 @@ function autoGeiger()
 
     checkMultibot()
 
-    searchOwner()
-
     if stopScript then
         return
     end
+
+    searchOwner()
 
     tt = os.time()
     logs("Started")
