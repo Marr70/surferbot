@@ -229,8 +229,15 @@ function searchGreen()
             end
         end
 
+
         if bot:findPath(getPosX(),getPosY()-4) then
             sleep(moveDelay*4/5)
+            if getSignal() < 2 then
+                if bot:findPath(mx,my+4) then
+                    sleep(moveDelay)
+                    break
+                end
+            end
         else
             if getPosY() == 0 then
                 if bot:findPath(mx,my+4) then
@@ -309,6 +316,12 @@ function searchGreen()
 
         if bot:findPath(getPosX(),getPosY()+4) then
             sleep(moveDelay*4/5)
+            if getSignal() < 2 then
+                if bot:findPath(mx,my+4) then
+                    sleep(moveDelay)
+                    break
+                end
+            end
         else
             if getPosY() == 53 then
                 break
@@ -387,6 +400,12 @@ function searchRapid()
 
         if bot:findPath(getPosX(),getPosY()-2) then
             sleep(moveDelay*4/5)
+            if getSignal() < 3 then
+                if bot:findPath(mx,my+2) then
+                    sleep(moveDelay)
+                    break
+                end
+            end
         else
             if getPosY() == 0 then
                 if bot:findPath(mx,my+2) then
@@ -465,6 +484,12 @@ function searchRapid()
 
         if bot:findPath(getPosX(),getPosY()+2) then
             sleep(moveDelay*4/5)
+            if getSignal() < 3 then
+                if bot:findPath(mx,my+2) then
+                    sleep(moveDelay)
+                    break
+                end
+            end
         else
             if getPosY() == 53 then
                 break
@@ -527,6 +552,12 @@ function searchPrize()
 
         if bot:findPath(getPosX(),getPosY()-1) then
             sleep(moveDelay)
+            if getSignal() < 4 then
+                if bot:findPath(mx3,my3+1) then
+                    sleep(moveDelay)
+                    break
+                end
+            end
         else
             if bot:findPath(mx3,my3) then
                 sleep(moveDelay)
