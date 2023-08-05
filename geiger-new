@@ -1,30 +1,83 @@
 bot = getBot()
-
-startSignal = 0
-stopScript = false
-charging = false
-multiBot = false
-coordinateDrop = false
-foundOwner = false
-customStorage = false
-
 BADS = {6416, 3196, 1500, 1498, 2806, 2804, 8270, 8272,8274, 4676, 4678, 4680, 4682, 4652, 4650, 4648, 4646, 11186, 10086, 10084,3204, 12502}
 GOODIES = {2206, 2242, 2244, 2246, 2248, 2250, 3792, 3306, 4654}
-firstLayer = {{x = 15, y = 13},{x = 49, y = 13},{x = 84, y = 13},{x = 15, y = 40},{x = 49, y = 40},{x = 84, y = 40}}
-secondLayer1 = {{x = -7, y = -7},{x = 7, y = -7},{x = -7, y = 7},{x = 7, y = 7}}
-secondLayer2 = {{x = -9, y = -7},{x = 9, y = -7},{x = -9, y = 7},{x = 9, y = 7}}
-thirdLayer = {{x = 5, y = -5},{x = -5, y = -5},{x = -5, y = 5},{x = 5, y = 5}}
-duplicateLine = {}
-dropList = {}
-storageList = {}
+drop_list = {}
+duplicate_line = {}
+storage_list = {}
+stop_script = false
+custom_storage = false
+use_coord = false
+charging = false
+found_owner = false
+multibot = false
 
+function scan_storage()
+    for i, obj in pairs(bot:getObjects()) do
+        if storage_list[obj.id] then
+            storage_list[obj.id] = storage_list[obj.id] + obj.count
+        else
+            storage_list[obj.id] = obj.count
+        end
+    end
+end
 
-function sendStorage(msgid)
-    scanStorage()
+function getCount(id)
+    for key,itm in pairs(storage_list) do
+        if key == id then
+            return itm
+        end
+    end
+    return 0
+end
+
+function count_profit()
+    local count = 0
+    if storage_list[4654] then
+        count = count + (storage_list[4654] * 60)
+    end
+    sleep(200)
+    if storage_list[3306] then
+        count = count + (storage_list[3306] * 2)
+    end
+    sleep(200)
+    if storage_list[2250] then
+        count = count + (storage_list[2250] * 55)
+    end
+    sleep(200)
+    if storage_list[2248] then
+        count = count + (storage_list[2248] * 45)
+    end
+    sleep(200)
+    if storage_list[2246] then
+        count = count + (storage_list[2246] * 3 / 2)
+    end
+    sleep(200)
+    if storage_list[2242] then
+        count = count + (storage_list[2242] * 3 / 2)
+    end
+    sleep(200)
+    if storage_list[2244] then
+        count = count + (storage_list[2244] * 1)
+    end
     sleep(500)
-    local profit = countProfit()
+    return count
+end
+
+function limit_decimal(number, decimalPlaces)
+    if type(number) == "number" and number == math.floor(number) then
+        return number
+    end
+    
+    local multiplier = 10 ^ decimalPlaces
+    return math.floor(number * multiplier) / multiplier
+end
+
+function send_storage(msgid)
+    scan_storage()
+    sleep(500)
+    local profit = count_profit()
     local DL = math.floor(profit/100)
-    local WL = limitDecimal(profit%100, 2)
+    local WL = limit_decimal(profit%100, 2)
 
     local script = [[
     {
@@ -41,7 +94,7 @@ function sendStorage(msgid)
             },
             {
                 "name": "[Bad Items]",
-                "value": "<:PNeck:1136676041881026632> **Purple V-Neck :** ]]..getCount(4680)..[[\n<:ONeck:1136676131035156572> **Orange V-Neck :** ]]..getCount(4682)..[[\n<:HazmatBoot:1136675978240852120> **Hazmat Boots :** ]]..getCount(4646)..[[\n<:HazmatPants:1136675886817607680> **Hazmat Pants :** ]]..getCount(4648)..[[\n<:HazmatSuit:1136675828810387597> **azmat Suits :** ]]..getCount(4650)..[[\n<:HazmatHelmet:1136675923849121824> **Hazmat Helmet :** ]]..getCount(4652)..[[\n<:DigitalSign:1136675778986246146> **Digital Sign :** ]]..getCount(11186)..[[\n<:AnimeFemale:1136675729417977956> **Anime Female :** ]]..getCount(10086)..[[\n<:AnimeMale:1136675689614020668> **Anime Male :** ]]..getCount(10084)..[[\n<:NerdHair:1136675648899911851> **Nerd Hair :** ]]..getCount(12502)..[[\n<:TreeDeco:1136675561578713199> **Tree Decorations :** ]]..getCount(3204)..[[",
+                "value": "<:PNeck:1136676041881026632> **Purple V-Neck** ]]..getCount(4680)..[[:\n<:ONeck:1136676131035156572> **Orange V-Neck :** ]]..getCount(4682)..[[\n<:HazmatBoot:1136675978240852120> **Hazmat Boots :** ]]..getCount(4646)..[[\n<:HazmatPants:1136675886817607680> **Hazmat Pants :** ]]..getCount(4648)..[[\n<:HazmatSuit:1136675828810387597> **azmat Suits :** ]]..getCount(4650)..[[\n<:HazmatHelmet:1136675923849121824> **Hazmat Helmet :** ]]..getCount(4652)..[[\n<:DigitalSign:1136675778986246146> **Digital Sign :** ]]..getCount(11186)..[[\n<:AnimeFemale:1136675729417977956> **Anime Female :** ]]..getCount(10086)..[[\n<:AnimeMale:1136675689614020668> **Anime Male :** ]]..getCount(10084)..[[\n<:NerdHair:1136675648899911851> **Nerd Hair :** ]]..getCount(12502)..[[\n<:TreeDeco:1136675561578713199> **Tree Decorations :** ]]..getCount(3204)..[[",
                 "inline": true
             },
             {
@@ -65,678 +118,49 @@ function sendStorage(msgid)
     }]]
 
     RequestINFO = {}
-    RequestINFO.url = webhookStorageUrl.."/messages/"..msgid
+    RequestINFO.url = webhook_storage_url.."/messages/"..msgid
     RequestINFO.method = PATCH
     RequestINFO.json = true
     RequestINFO.postData = script
     x = httpReq(RequestINFO)
 end
 
-function limitDecimal(number, decimalPlaces)
-    if type(number) == "number" and number == math.floor(number) then
-        return number
-    end
-    
-    local multiplier = 10 ^ decimalPlaces
-    return math.floor(number * multiplier) / multiplier
-end
-
-function countProfit()
-    local count = 0
-    if storageList[4654] then
-        count = count + (storageList[4654] * 60)
-    end
-    sleep(200)
-    if storageList[3306] then
-        count = count + (storageList[3306] * 2)
-    end
-    sleep(200)
-    if storageList[2250] then
-        count = count + (storageList[2250] * 55)
-    end
-    sleep(200)
-    if storageList[2248] then
-        count = count + (storageList[2248] * 45)
-    end
-    sleep(200)
-    if storageList[2246] then
-        count = count + (storageList[2246] * 3 / 2)
-    end
-    sleep(200)
-    if storageList[2242] then
-        count = count + (storageList[2242] * 3 / 2)
-    end
-    sleep(200)
-    if storageList[2244] then
-        count = count + (storageList[2244] * 1)
-    end
-    sleep(500)
-    return count
-end
-
-function scanStorage()
-    for i, obj in pairs(bot:getObjects()) do
-        if storageList[obj.id] then
-            storageList[obj.id] = storageList[obj.id] + obj.count
-        else
-            storageList[obj.id] = obj.count
-        end
-    end
-end
-
-function getCount(id)
-    for key,itm in pairs(storageList) do
-        if key == id then
-            return itm
-        end
-    end
-    return 0
-end
-
-function getPosX()
-    return math.floor(bot:getLocal().pos.x/32)
-end
-
-function getPosY()
-    return math.floor(bot:getLocal().pos.y/32)
-end
-
-function bStatus()
-    return bot:getBotStatus()
-end
-
-function eStatus()
-    return bot:getEnetStatus()
-end
-
-function getSignal()
-    sleep(500)
-    local find = bot:getSignal()
-    if find == RED then
-        return 1
-    elseif find == YELLOW then
-        return 2
-    elseif find == GREEN then
-        return 3
-    elseif find == RAPIDGREEN then
-        return 4
-    else
-        return 0
-    end
-end
-
-function searchGreen()
-    local mx,my = getPosX(), getPosY()
-
-    while getPosY() >= 0 do
-        local midx1,midy1 = getPosX(), getPosY()
-
-        while true do 
-            if getSignal() > 2 then
-                return
-            elseif getSignal() < 2 then
-                if bot:findPath(midx1,midy1) then
-                    sleep(moveDelay)
-                    break
-                end
-            elseif getSignal() == 2 then
-                if bot:findPath(getPosX()+4, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if getPosX() == 99 then
-                        if bot:findPath(midx1,midy1) then
-                            sleep(moveDelay)
-                            break
-                        end
-                    else
-                        if bot:findPath(99,getPosY()) then
-                            sleep(moveDelay*4/5)
-                        end
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            end
-        end
-
-        while true do 
-            if getSignal() > 2 then
-                return
-            elseif getSignal() < 2 then
-                if bot:findPath(midx1,midy1) then
-                    sleep(moveDelay)
-                    break
-                end
-            elseif getSignal() == 2 then
-                if bot:findPath(getPosX()-4, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if getPosX() == 0 then
-                        if bot:findPath(midx1,midy1) then
-                            sleep(moveDelay)
-                            break
-                        end
-                    else
-                        if bot:findPath(0,getPosY()) then
-                            sleep(moveDelay*4/5)
-                        end
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            end
-        end
-
-
-        if bot:findPath(getPosX(),getPosY()-4) then
-            sleep(moveDelay*4/5)
-            if getSignal() < 2 then
-                if bot:findPath(mx,my+4) then
-                    sleep(moveDelay)
-                    break
-                end
-            end
-        else
-            if getPosY() == 0 then
-                if bot:findPath(mx,my+4) then
-                    sleep(moveDelay)
-                    break
-                end
-            else
-                if bot:findPath(getPosX(),0) then
-                    sleep(moveDelay*4/5)
-                end
-            end
-        end
-    end
-
-
-    while getPosY() <= 53 do
-        local midx2,midy2 = getPosX(), getPosY()
-
-        while true do 
-            if getSignal() > 2 then
-                return
-            elseif getSignal() < 2 then
-                if bot:findPath(midx2,midy2) then
-                    sleep(moveDelay)
-                    break
-                end
-            elseif getSignal() == 2 then
-                if bot:findPath(getPosX()+4, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if getPosX() == 99 then
-                        if bot:findPath(midx2,midy2) then
-                            sleep(moveDelay)
-                            break
-                        end
-                    else
-                        if bot:findPath(99,getPosY()) then
-                            sleep(moveDelay*4/5)
-                        end
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            end
-        end
-
-        while true do 
-            if getSignal() > 2 then
-                return
-            elseif getSignal() < 2 then
-                if bot:findPath(midx2,midy2) then
-                    sleep(moveDelay)
-                    break
-                end
-            elseif getSignal() == 2 then
-                if bot:findPath(getPosX()-4, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if getPosX() == 0 then
-                        if bot:findPath(midx2,midy2) then
-                            sleep(moveDelay)
-                            break
-                        end
-                    else
-                        if bot:findPath(0,getPosY()) then
-                            sleep(moveDelay*4/5)
-                        end
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            end
-        end
-
-        if bot:findPath(getPosX(),getPosY()+4) then
-            sleep(moveDelay*4/5)
-            if getSignal() < 2 then
-                if bot:findPath(mx,my+4) then
-                    sleep(moveDelay)
-                    break
-                end
-            end
-        else
-            if getPosY() == 53 then
-                break
-            else
-                if bot:findPath(getPosX(),53) then
-                    sleep(moveDelay*4/5)
-                end
-            end
-        end
-    end
-end
-
-function searchRapid()
-    local mx,my = getPosX(), getPosY()
-
-    while getPosY() >= 0 do
-        local midx1,midy1 = getPosX(), getPosY()
-
-        while true do 
-            if getSignal() > 3 then
-                return
-            elseif getSignal() < 3 then
-                if bot:findPath(midx1,midy1) then
-                    sleep(moveDelay)
-                    break
-                end
-            elseif getSignal() == 3 then
-                if bot:findPath(getPosX()+2, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if getPosX() == 99 then
-                        if bot:findPath(midx1,midy1) then
-                            sleep(moveDelay)
-                            break
-                        end
-                    else
-                        if bot:findPath(99,getPosY()) then
-                            sleep(moveDelay*4/5)
-                        end
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            end
-        end
-
-        while true do 
-            if getSignal() > 3 then
-                return
-            elseif getSignal() < 3 then
-                if bot:findPath(midx1,midy1) then
-                    sleep(moveDelay)
-                    break
-                end
-            elseif getSignal() == 3 then
-                if bot:findPath(getPosX()-2, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if getPosX() == 0 then
-                        if bot:findPath(midx1,midy1) then
-                            sleep(moveDelay)
-                            break
-                        end
-                    else
-                        if bot:findPath(0,getPosY()) then
-                            sleep(moveDelay*4/5)
-                        end
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            end
-        end
-
-        if bot:findPath(getPosX(),getPosY()-2) then
-            sleep(moveDelay*4/5)
-            if getSignal() < 3 then
-                if bot:findPath(mx,my+2) then
-                    sleep(moveDelay)
-                    break
-                end
-            end
-        else
-            if getPosY() == 0 then
-                if bot:findPath(mx,my+2) then
-                    sleep(moveDelay)
-                    break
-                end
-            else
-                if bot:findPath(getPosX(),0) then
-                    sleep(moveDelay*4/5)
-                end
-            end
-        end
-    end
-
-
-    while getPosY() <= 53 do
-        local midx2,midy2 = getPosX(), getPosY()
-
-        while true do 
-            if getSignal() > 3 then
-                return
-            elseif getSignal() < 3 then
-                if bot:findPath(midx2,midy2) then
-                    sleep(moveDelay)
-                    break
-                end
-            elseif getSignal() == 3 then
-                if bot:findPath(getPosX()+2, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if getPosX() == 99 then
-                        if bot:findPath(midx2,midy2) then
-                            sleep(moveDelay)
-                            break
-                        end
-                    else
-                        if bot:findPath(99,getPosY()) then
-                            sleep(moveDelay*4/5)
-                        end
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            end
-        end
-
-        while true do 
-            if getSignal() > 3 then
-                return
-            elseif getSignal() < 3 then
-                if bot:findPath(midx2,midy2) then
-                    sleep(moveDelay)
-                    break
-                end
-            elseif getSignal() == 3 then
-                if bot:findPath(getPosX()-2, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if getPosX() == 0 then
-                        if bot:findPath(midx2,midy2) then
-                            sleep(moveDelay)
-                            break
-                        end
-                    else
-                        if bot:findPath(0,getPosY()) then
-                            sleep(moveDelay*4/5)
-                        end
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            end
-        end
-
-        if bot:findPath(getPosX(),getPosY()+2) then
-            sleep(moveDelay*4/5)
-            if getSignal() < 3 then
-                if bot:findPath(mx,my+2) then
-                    sleep(moveDelay)
-                    break
-                end
-            end
-        else
-            if getPosY() == 53 then
-                break
-            else
-                if bot:findPath(getPosX(),53) then
-                    sleep(moveDelay*4/5)
-                end
-            end
-        end
-    end
-end
-
-function searchPrize()
-    local mx3,my3 = getPosX(), getPosY()
-
-    while getPosY() >= 0 do
-        local midx5,midy5 = getPosX(), getPosY()
-
-        while true do
-            if getSignal() == 4 then
-                if bot:findPath(getPosX()+1, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if bot:findPath(midx5,midy5) then
-                        sleep(moveDelay)
-                        break
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            else
-                if bot:findPath(midx5,midy5) then
-                    sleep(moveDelay)
-                    break
-                end
-            end
-        end
-
-        while true do
-            if getSignal() == 4 then
-                if bot:findPath(getPosX()-1, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if bot:findPath(midx5,midy5) then
-                        sleep(moveDelay)
-                        break
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            else
-                if bot:findPath(midx5,midy5) then
-                    sleep(moveDelay)
-                    break
-                end
-            end
-        end
-
-        if bot:findPath(getPosX(),getPosY()-1) then
-            sleep(moveDelay)
-            if getSignal() < 4 then
-                if bot:findPath(mx3,my3+1) then
-                    sleep(moveDelay)
-                    break
-                end
-            end
-        else
-            if bot:findPath(mx3,my3) then
-                sleep(moveDelay)
-                break
-            end
-        end
-    end
-
-
-    while getPosY() <= 53 do
-        local midx6,midy6 = getPosX(), getPosY()
-
-        while true do
-            if getSignal() == 4 then
-                if bot:findPath(getPosX()+1, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if bot:findPath(midx6,midy6) then
-                        sleep(moveDelay)
-                        break
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            else
-                if bot:findPath(midx6,midy6) then
-                    sleep(moveDelay)
-                    break
-                end
-            end
-        end
-
-        while true do
-            if getSignal() == 4 then
-                if bot:findPath(getPosX()-1, getPosY()) then
-                    sleep(moveDelay*4/5)
-                else
-                    if bot:findPath(midx6,midy6) then
-                        sleep(moveDelay)
-                        break
-                    end
-                end
-                if not bot:isEquipped(2204) then
-                    return
-                end
-            else
-                if bot:findPath(midx6,midy6) then
-                    sleep(moveDelay)
-                    break
-                end
-            end
-        end
-
-        if bot:findPath(getPosX(),getPosY()+1) then
-            sleep(moveDelay)
-        else
-            break
-        end
-    end
-end
-
-function searchOrder()
-    sleep(500)
-    if getSignal() == 2 then
-        searchGreen()
-    end
-    if eStatus() ~= Connected then
-        return
-    end
-    sleep(500)
-    if getSignal() == 3 then
-        searchRapid()
-    end
-    if eStatus() ~= Connected then
-        return
-    end
-    sleep(500)
-    if getSignal() ==  4 then
-        searchPrize()
-    end
-end
-
-function checkBlock(index)
-    local ex = firstLayer[index].x
-    local ye = firstLayer[index].y
-
-    if index == 2 or index == 5 then
-        for _,v in pairs(secondLayer2) do
-            if bot:findPath(ex + v.x, ye + v.y) then
-                sleep(moveDelay)
-                if getSignal() > 1 then
-                    searchOrder()
-                    break
-                end
-            end
-            if eStatus() ~= Connected then
-                return
-            end
-        end
-    else
-        for _,v in pairs(secondLayer1) do
-            if bot:findPath(ex + v.x, ye + v.y) then
-                sleep(moveDelay)
-                if getSignal() > 1 then
-                    searchOrder()
-                    break
-                end
-            end
-            if eStatus() ~= Connected then
-                return
-            end
-        end
-    end
-end
-
-function startSearch()
-    t = os.time()
-    while true do
-        for i,tile in pairs(firstLayer) do
-            if bot:findPath(tile.x,tile.y) then
-                sleep(moveDelay)
-                if getSignal() > startSignal then
-                    checkBlock(i)
-                end
-                if not bot:isEquipped(2204) then
-                    break
-                end
-            end
-            if eStatus() ~= Connected then
-                reconInfo()
-                connect()
-                reconInfo()
-                t = os.time()
-                break
-            end
-        end
-        if ((os.time()-t)%3600)/60 > 5 then
-            logMsg("Can't  find item within 5 minutes, reconnect")
-            bot:disconnect()
-            sleep(1000)
-            reconInfo()
-            connect()
-            reconInfo()
-            t = os.time()
-        else
-            if not bot:isEquipped(2204) then
-                break
-            else
-                sleep(2000)
-            end
-        end
-    end
-    te = os.time() - t
-    logMsg(getFoundItem())
-    sleep(500)
-    logs("Time Elapsed: "..math.floor((te % 3600) / 60).." Minutes "..(te % 60).." Seconds")
-    charging = true
-end
-
-function checkTable(tbl)
-    if tbl.x and tbl.y then
-        coordinateDrop = true
-    elseif tbl.good and tbl.bad then
-        coordinateDrop = false
+function check_table(table)
+    if table.x and table.y then
+        use_coord = true
+    elseif table.good and table.bad then
+        use_coord = false
     else
         log("storage_pos not valid, check example in server\n")
-        stopScirpt = true
+        stop_script = true
         return
     end
 end
 
-function checkOwnerTable(tbl, value)
-    for i, data in pairs(tbl) do
+function check_owner_table(table, value)
+    for i, data in pairs(table) do
         if string.upper(data) == string.upper(value) then
             return true
         end
     end
     return false
+end
+
+function get_signals()
+    sleep(500)
+    local signal = bot:getSignal()
+    sleep(500)
+    if signal == RAPIDGREEN then
+        return 4
+    elseif signal == GREEN then
+        return 3
+    elseif signal == YELLOW then
+        return 2
+    elseif signal == RED then
+        return 1
+    else
+        return 0
+    end
 end
 
 function round(n)
@@ -755,7 +179,7 @@ function collect(range, itemId)
     end
 end
 
-function faceSide(direction)
+function face_side(direction)
     local packet = {}
     packet.type = 0
     if direction == "left" then
@@ -769,64 +193,64 @@ function faceSide(direction)
 end
 
 function take()
-    sleep(500)   
+    sleep(1000)   
     bot:autoCollect(2,false)
-    sleep(500)
-    warp(takeGeigerWorld,takeGeigerDoor)
-    sleep(500)
+    sleep(200)
+    tele(world_take_geiger,id_door_take_geiger)
+    sleep(200)
     while bot:getItemCount(2204) == 0 do
         while true do
             for _,obj in pairs(bot:getObjects()) do
                 if obj.id == 2204 then
                     if bot:findPath(round(obj.pos.x/32) - 1, math.floor(obj.pos.y/32)) then
                         sleep(1000)
+                        collect(2)
+                        sleep(1000)
                     end
-                    collect(2)
-                    sleep(1000)
                 end
             end
             if bot:getItemCount(2204) > 0 then
                 break
             end
-            sleep(5000)
         end
     end
-    sleep(1000)
+    sleep(2000)
     while not bot:isEquipped(2204) do
         wear(2204)
-        sleep(2000)
+        sleep(3000)
     end
     if bot:getItemCount(2204) > 1 then
         bot:autoCollect(2,false)
         sleep(500)
-        faceSide("right")
-        sleep(1500)
+        face_side("right")
+        sleep(3000)
         bot:drop(2204, bot:getItemCount(2204)-1)
-        sleep(1500)
+        sleep(2500)
     end
-    sleep(500)
+    sleep(1000)
 end
 
-function checkGeiger()
+function check_geiger()
     if bot:isEquipped(2204) then
        return 
     end
     if bot:getItemCount(2204) > 0 then
+        tele(geiger_world,geiger_id)
         while not bot:isEquipped(2204) do
             wear(2204)
-            sleep(2000)
+            sleep(3000)
         end
         return
     end
     if bot:getItemCount(2286) > 0 then
         sleep(1000)
-        warp(geigerWorld,geigerDoor)
+        tele(geiger_world,geiger_id)
         charging = true
         return
     end
-    if not takeGeiger then
-        stopScirpt = true
-        logs("There are no geiger in inventory, you might want to turn on takeGeiger")
+    if not take_geiger then
+        stop_script = true
+        logs("There are no geiger in inventory, you might want to turn on take_geiger")
         return
     end
     while not bot:isEquipped(2204) do
@@ -834,18 +258,16 @@ function checkGeiger()
     end
 end
 
-function checkMultibot()
+function has_same_worldname(tbl)
     local count = 0
-    for key,data in pairs(botSettings) do
-        if string.upper(data.geigerWorld) == string.upper(geigerWorld) then
+
+    for key,data in pairs(tbl) do
+        if string.upper(data.world_name) == string.upper(geiger_world) then
             count = count + 1
-            duplicateLine[getBot(key):getIndex()] = key
+            duplicate_line[getBot(key):getIndex()] = key 
         end
     end
-
-    if count > 1 then 
-        multiBot = true
-    end
+    return count
 end
 
 function punch(x,y)
@@ -853,39 +275,38 @@ function punch(x,y)
     return bot:hitTile(math.floor(player.pos.x/32) + x, math.floor(player.pos.y/32) + y)
 end
 
-function ToxicWaste()
-    wasteTiles = {}
-
+function break_toxic_waste()
+    waste_tiles = {}
     for _,tile in ipairs(bot:getTiles()) do
         if tile.fg == 778 or tile.bg == 778 then
-            table.insert(wasteTiles, {x = tile.x, y = tile.y})
+            table.insert(waste_tiles, {x = tile.x, y = tile.y})
         end
     end
 
-    if #wasteTiles > 0 then
+    if #waste_tiles > 0 then
         logs("Clearing Toxic Waste")
-        while #wasteTiles > 0 do
-            for key,tile in pairs(wasteTiles) do
+        while #waste_tiles > 0 do
+            for key,tile in pairs(waste_tiles) do
                 if bot:findPath(tile.x,tile.y+1) then
                     sleep(500)
                     punch(0,-1)
                     sleep(1000)
-                    table.remove(wasteTiles, key)
+                    table.remove(waste_tiles, key)
                 elseif bot:findPath(tile.x,tile.y-1) then
                     sleep(500)
                     punch(0,1)
                     sleep(1000)
-                    table.remove(wasteTiles, key)
+                    table.remove(waste_tiles, key)
                 elseif bot:findPath(tile.x+1,tile.y) then
                     sleep(500)
                     punch(-1,0)
                     sleep(1000)
-                    table.remove(wasteTiles, key)
+                    table.remove(waste_tiles, key)
                 elseif bot:findPath(tile.x-1,tile.y) then
                     sleep(500)
                     punch(1,0)
                     sleep(1000)
-                    table.remove(wasteTiles, key)
+                    table.remove(waste_tiles, key)
                 end
             end
         end
@@ -893,33 +314,46 @@ function ToxicWaste()
     end
 end
 
-function reserveItems()
-    for _,itm in pairs(bot:getInventory()) do
-        table.insert(goods, {ids = itm.id, jumlah = itm.count})
-        sleep(100)
+function bstatus()
+    return bot:getBotStatus()
+end
+
+function estatus()
+    return bot:getEnetStatus()
+end
+
+function cek_multibot(tbl, element)
+    for i,data in pairs(tbl) do
+        if string.upper(data.name) == string.upper(element) then
+            return true
+        end
     end
+    return false
 end
 
 function main()
+    midX, midY = 50, 27
     goods = {}
 
-    warp(geigerWorld,geigerDoor)
-
-    checkGeiger()
-    if stopScript or charging then
+    check_geiger()
+    if stop_script then
+        return
+    end
+    if charging then
         return
     end
 
-    if multiBot then
-        for _,player in pairs(duplicateLine) do
+    tele(geiger_world,geiger_id)
+
+    if multibot then
+        for _,player in pairs(duplicate_line) do
             if not getBot(player):isEquipped(2204) then
                 while getBot(player):getItemCount(2204) == 0 and getBot(player):getItemCount(2286) == 0 do
                     sleep(2000)
                 end
             end
         end
-
-        for ko,bo in pairs(duplicateLine) do
+        for ko,bo in pairs(duplicate_line) do
             if string.upper(bo) == string.upper(getBot():getLocal().name) then
                 break
             end
@@ -931,12 +365,92 @@ function main()
         end
     end
 
-    ToxicWaste()
-    reserveItems()
-    startSearch()
+    sleep(2000)
+    break_toxic_waste()
+    reserve_items()
+    
+    blup = false
+    bldown = false
+    blright = false
+    blleft = false
+    bltopright = false
+    blbottomright = false
+    blbottomleft = false
+    bltopleft = false
+
+    if bot:findPath(midX, midY) then
+        sleep(2000)
+        startSignal = get_signals()
+    end
+    if estatus() ~= Connected then
+        return
+    end
+
+    t = os.time()
+
+    while true do
+        sleep(1000)
+        if startSignal == 4 then
+            if estatus() ~= Connected then
+                return
+            end
+            sleep(1000)
+            rapid_green()
+            sleep(1000)
+            if estatus() ~= Connected then
+                return
+            end
+            if not bot:isEquipped(2204) then
+                break
+            end
+        else
+            while true do
+                if ((os.time()-t)%3600)/60 > 10 then
+                    break
+                end
+                if checkDirection() then
+                    break
+                end
+                if estatus() ~= Connected then
+                    return
+                end
+                if ((os.time()-t)%3600)/60 > 10 then
+                    break
+                end
+                if checkDiagonal() then
+                    break
+                end
+                if estatus() ~= Connected then
+                    return
+                end
+                if ((os.time()-t)%3600)/60 > 10 then
+                    break
+                end
+            end
+        end
+        if ((os.time()-t)%3600)/60 > 10 then
+            log_msg("Can't  find item within 10 minutes, reconnect")
+            bot:disconnect()
+            sleep(5000)
+            return
+        end
+    end
+    te = os.time() - t
+    sleep(1000)
+    log_msg(get_found_item())
+    sleep(500)
+    logs("Time Elapsed: "..math.floor((te % 3600) / 60).." Minutes "..(te % 60).." Seconds")
+    charging = true
 end
 
-function isIncluded(element, table)
+function reserve_items()
+    for _,itm in pairs(bot:getInventory()) do
+        table.insert(goods, {ids = itm.id, jumlah = itm.count})
+        sleep(50)
+    end
+end
+
+function is_included(element, table)
     for _,itm in pairs(table) do
         if element == itm.ids then
             return true
@@ -945,7 +459,7 @@ function isIncluded(element, table)
     return false
 end
 
-function isChanged(idnya, jumlahnya, table)
+function is_changed(idnya, jumlahnya, table)
     for _,itm in pairs(table) do
         if idnya == itm.ids then
             if jumlahnya == itm.jumlah then
@@ -957,7 +471,7 @@ function isChanged(idnya, jumlahnya, table)
     end
 end
 
-function countChanged(idnya, table)
+function count_changed(idnya, table)
     for _,itm in pairs(table) do
         if idnya == itm.ids then
             return bot:getItemCount(idnya) - itm.jumlah
@@ -965,14 +479,14 @@ function countChanged(idnya, table)
     end
 end
 
-function getFoundItem()
+function get_found_item()
     for _,itm in pairs(bot:getInventory()) do
         if itm.id == 2286 then
             sleep(50)
         else
-            if not isIncluded(itm.id, goods) or isChanged(itm.id, itm.count, goods) then
+            if not is_included(itm.id, goods) or is_changed(itm.id, itm.count, goods) then
                 local nama = getItemInfo(itm.id).name
-                local jumlah = countChanged(itm.id, goods) or bot:getItemCount(itm.id)
+                local jumlah = count_changed(itm.id, goods) or bot:getItemCount(itm.id)
                 return string.format("Found Item:  %s (x%s)", nama, jumlah)
             end
         end
@@ -983,14 +497,836 @@ end
 function wear(id)
     local packet = {}
     packet.type = 10
-    packet.int_data = id
+    packet.int_data = id -- Clothing ID (Jeans)
     bot:sendPacketRaw(packet)
 end
 
-function logMsg(message)   
+function getPosX()
+    return math.floor(bot:getLocal().pos.x/32)
+end
+
+function getPosY()
+    return math.floor(bot:getLocal().pos.y/32)
+end
+
+
+function rapid_up()
+    local midx = midX
+    local midy = midY
+    if not bot:isEquipped(2204) then
+        return true
+    end
+    while math.floor(bot:getLocal().pos.y/32) >= 0 do
+        while bot:isEquipped(2204) do
+            if get_signals() == 4 then
+                if bot:findPath(getPosX() + 1, getPosY()) then
+                    sleep(move_delay)
+                end
+                if estatus() ~= Connected then
+                    return
+                end
+            else
+                break
+            end
+            if not bot:isEquipped(2204) then
+                return true
+            end
+        end
+        if bot:findPath(midx,midy) then
+            sleep(move_delay)
+        end
+        if estatus() ~= Connected then
+            return
+        end
+        while bot:isEquipped(2204) do
+            if get_signals() == 4 then
+                if bot:findPath(getPosX() - 1, getPosY()) then
+                    sleep(move_delay)
+                end
+                if estatus() ~= Connected then
+                    return
+                end
+            else
+                break
+            end
+            if not bot:isEquipped(2204) then
+                return true
+            end
+        end
+        if math.floor(bot:getLocal().pos.y/32) ~= 0 then
+            midy = midy - 1
+            if bot:findPath(midx,midy) then
+                sleep(1500)
+                if get_signals() ~= 4 then
+                    return false
+                end
+            end
+            if estatus() ~= Connected then
+                return
+            end
+        else
+            return false
+        end
+    end
+end
+
+function rapid_down()
+    local midx = midX
+    local midy = midY + 1
+    if bot:findPath(midx,midy) then
+        sleep(move_delay)
+    end
+    if estatus() ~= Connected then
+        return
+    end
+    while math.floor(bot:getLocal().pos.y/32) <= 53 do
+        while bot:isEquipped(2204) do
+            if get_signals() == 4 then
+                if bot:findPath(getPosX() + 1, getPosY()) then
+                    sleep(move_delay)
+                end
+                if estatus() ~= Connected then
+                    return
+                end
+            else
+                break
+            end
+            if not bot:isEquipped(2204) then
+                return true
+            end
+        end
+        if bot:findPath(midx,midy) then
+            sleep(move_delay)
+        end
+        if estatus() ~= Connected then
+            return
+        end
+        while bot:isEquipped(2204) do
+            if get_signals() == 4 then
+                if bot:findPath(getPosX() - 1, getPosY()) then
+                    sleep(move_delay)
+                end
+                if estatus() ~= Connected then
+                    return
+                end
+            else
+                break
+            end
+            if not bot:isEquipped(2204) then
+                return true
+            end
+        end
+        if math.floor(bot:getLocal().pos.y/32) ~= 53 then
+            midy = midy + 1
+            if bot:findPath(midx,midy) then
+                sleep(1500)
+                if get_signals() ~= 4 then
+                    return false
+                end
+            end
+            if estatus() ~= Connected then
+                return
+            end
+        else
+            return false
+        end
+    end
+end
+
+function rapid_green()
+    if rapid_up() then
+        return
+    end
+    if estatus() ~= Connected then
+        return
+    end
+    sleep(move_delay)
+    if rapid_down() then
+        return
+    end
+    if estatus() ~= Connected then
+        return
+    end
+end
+
+function checkDirection()
+    if startSignal == 0 then
+        moveSpeed = 5
+    elseif startSignal == 1 then
+        moveSpeed = 5 
+    elseif startSignal == 2 then
+        moveSpeed = 5 
+    elseif startSignal == 3 then
+        moveSpeed = 2
+    end
+
+    while getPosY() ~= 0 do
+        if not bot:isEquipped(2204) then
+            startSignal = 4 
+            return true
+        else
+            if not blup then
+                if (getPosY() - moveSpeed) >= 0 then
+                    if bot:findPath(getPosX(), getPosY() - moveSpeed) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            bldown = true
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                else
+                    if bot:findPath(getPosX(), 0) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            bldown = true
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        else
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                end
+            else
+                break
+            end
+        end
+    end
+
+    while getPosX() ~= 99 do
+        if not bot:isEquipped(2204) then
+            startSignal = 4 
+            return true
+        else
+            if not blright then
+                if (getPosX() + moveSpeed) <= 99 then
+                    if bot:findPath(getPosX() + moveSpeed, getPosY()) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            blleft = true
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                else
+                    if bot:findPath(99, getPosY()) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            blleft = true
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        else
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                end
+            else
+                break
+            end
+        end
+    end
+    
+    while getPosY() ~= 53 do
+        if not bot:isEquipped(2204) then
+            startSignal = 4 
+            return true
+        else
+            if not bldown then
+                if (getPosY() + moveSpeed) <= 53 then
+                    if bot:findPath(getPosX(), getPosY() + moveSpeed) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            blup = true
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        else
+                            if getPosY() == 53 then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                else
+                    if bot:findPath(getPosX(), 53) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            blup = true
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        else
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                end
+            else
+                break
+            end
+        end
+    end
+
+    while getPosX() ~= 0 do
+        if not bot:isEquipped(2204) then
+            startSignal = 4 
+            return true
+        else
+            if not blleft then
+                if (getPosX() - moveSpeed) >= 0 then
+                    if bot:findPath(getPosX() - moveSpeed, getPosY()) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            blright = true
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                else
+                    if bot:findPath(0, getPosY()) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            blright = true
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        else
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                end
+            else
+                break
+            end
+        end
+    end
+
+    if bot:findPath(midX, midY) then
+        sleep(move_delay)
+        return false
+    end
+end
+
+
+function checkDiagonal()
+    if startSignal == 0 then
+        moveSpeed = 5
+    elseif startSignal == 1 then
+        moveSpeed = 5 
+    elseif startSignal == 2 then
+        moveSpeed = 5 
+    elseif startSignal == 3 then
+        moveSpeed = 2
+    end
+
+    while getPosX() ~= 99 or getPosY() ~= 0 do
+        if not bot:isEquipped(2204) then
+            startSignal = 4 
+            return true
+        else
+            if not bltopright then
+                if (getPosX() + moveSpeed) <= 99 and (getPosY() - moveSpeed) >= 0 then
+                    if bot:findPath(getPosX() + moveSpeed, getPosY() - moveSpeed) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                elseif (getPosX() + moveSpeed) > 99 or (getPosY() - moveSpeed) < 0 then
+                    if (getPosX() + moveSpeed) > 99 and (getPosY() - moveSpeed) >= 0 then
+                        if bot:findPath(99, getPosY() - moveSpeed) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    elseif (getPosY() - moveSpeed) < 0 and (getPosX() + moveSpeed) <= 99 then
+                        if bot:findPath(getPosX() + moveSpeed, 0) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    elseif (getPosX() + moveSpeed) > 99 and (getPosY() - moveSpeed) < 0 then
+                        if bot:findPath(99, 0) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    end
+                end
+            else
+                break
+            end
+        end
+    end
+    
+    while getPosX() ~= 99 or getPosY() ~= 53 do
+        if not bot:isEquipped(2204) then
+            startSignal = 4 
+            return true
+        else
+            if not blbottomright then
+                if (getPosX() + moveSpeed) <= 99 and (getPosY() + moveSpeed) <= 53 then
+                    if bot:findPath(getPosX() + moveSpeed, getPosY() + moveSpeed) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                elseif (getPosX() + moveSpeed) > 99 or (getPosY() + moveSpeed) > 53 then
+                    if (getPosX() + moveSpeed) > 99 and (getPosY() + moveSpeed) <= 53 then
+                        if bot:findPath(99, getPosY() + moveSpeed) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    elseif (getPosX() + moveSpeed) <= 99 and (getPosY() + moveSpeed) > 53 then
+                        if bot:findPath(getPosX() + moveSpeed, 53) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    elseif (getPosX() + moveSpeed) > 99 and (getPosY() + moveSpeed) > 53 then
+                        if bot:findPath(99, 53) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    end
+                end
+            else
+                break
+            end
+        end
+    end
+
+    while getPosX() ~= 0 or getPosY() ~= 53 do
+        if not bot:isEquipped(2204) then
+            startSignal = 4 
+            return true
+        else
+            if not blbottomleft then
+                if (getPosX() - moveSpeed) >= 0 and (getPosY() + moveSpeed) <= 53 then
+                    if bot:findPath(getPosX() - moveSpeed, getPosY() + moveSpeed) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                elseif (getPosX() - moveSpeed) < 0 or (getPosY() + moveSpeed) > 53 then
+                    if (getPosX() - moveSpeed) >= 0 and (getPosY() + moveSpeed) > 53 then
+                        if bot:findPath(getPosX() - moveSpeed, 53) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    elseif (getPosX() - moveSpeed) < 0 and (getPosY() + moveSpeed) <= 53 then
+                        if bot:findPath(0, getPosY() + moveSpeed) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    elseif (getPosX() - moveSpeed) < 0 and (getPosY() + moveSpeed) > 53 then
+                        if bot:findPath(0, 53) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    end
+                end
+            else
+                break
+            end
+        end
+    end
+
+    while getPosX() ~= 0 or getPosY() ~= 0 do
+        if not bot:isEquipped(2204) then
+            startSignal = 4 
+            return true
+        else
+            if not bltopleft then
+                if (getPosX() - moveSpeed) >= 0 and (getPosY() - moveSpeed) >= 0 then
+                    if bot:findPath(getPosX() - moveSpeed, getPosY() - moveSpeed) then
+                        sleep(move_delay)
+                        local newSignal = get_signals()
+                        if newSignal > startSignal then
+                            midX, midY = getPosX(), getPosY()
+                            startSignal = newSignal
+                            return true
+                        elseif newSignal < startSignal then
+                            if bot:findPath(midX,midY) then
+                                sleep(move_delay)
+                                break
+                            end
+                        end
+                    end
+                    if estatus() ~= Connected then
+                        return false
+                    end
+                elseif (getPosX() - moveSpeed) < 0 or (getPosY() - moveSpeed) < 0 then
+                    if (getPosX() - moveSpeed) >= 0 and (getPosY() - moveSpeed) < 0 then
+                        if bot:findPath(getPosX() - moveSpeed, 0) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    elseif (getPosX() - moveSpeed) < 0 and (getPosY() - moveSpeed) >= 0 then
+                        if bot:findPath(0, getPosY() - moveSpeed) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    elseif (getPosX() - moveSpeed) < 0 and (getPosY() - moveSpeed) < 0 then
+                        if bot:findPath(0, 0) then
+                            sleep(move_delay)
+                            local newSignal = get_signals()
+                            if newSignal > startSignal then
+                                midX, midY = getPosX(), getPosY()
+                                startSignal = newSignal
+                                return true
+                            elseif newSignal < startSignal then
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            else
+                                if bot:findPath(midX,midY) then
+                                    sleep(move_delay)
+                                    break
+                                end
+                            end
+                        end
+                        if estatus() ~= Connected then
+                            return false
+                        end
+                    end
+                end
+            else
+                break
+            end
+        end
+    end
+
+    if bot:findPath(midX, midY) then
+        sleep(move_delay)
+        return false
+    end
+end
+
+function log_msg(message)   
     log(string.format("[%s] %s \n", bot:getLocal().name, message))
-    if webhookEnabled then
-        sendWebhook(message)
+    if webhook_enabled then
+        send_webhook(message)
     end
 end 
 
@@ -998,7 +1334,7 @@ function logs(message)
     log(string.format("[%s] %s \n", bot:getLocal().name, message))
 end
 
-function getEnetStatus()
+function get_enet_status()
     local status
     local botStatus = bot:getEnetStatus()
     if botStatus == Disconnected then
@@ -1013,18 +1349,17 @@ end
 
 function reconInfo()
     ut = os.time() - tt
-    if getEnetStatus() == "Disconnected" then
+    if get_enet_status() == "Disconnected" then
         color = 9242129
-    elseif getEnetStatus() == "Connected" then
+    elseif get_enet_status() == "Connected" then
         color = 756998
     end
-
     local script = [[
         {
             "content": "@everyone",
             "embeds": [
               {
-                "title": "[]]..string.lower(bot:getLocal().name)..[[] status is ]]..getEnetStatus()..[[",
+                "title": "[]]..string.lower(bot:getLocal().name)..[[] status is ]]..get_enet_status()..[[",
                 "color": ]]..color..[[,
                 "footer": {
                     "text": "Bot Uptime: ]]..math.floor(ut/86400)..[[ Day ]]..math.floor(ut%86400/3600)..[[ Hour ]]..math.floor(ut%86400%3600/60)..[[ Minute \nMarr's Script | ]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[["
@@ -1032,50 +1367,20 @@ function reconInfo()
               }
             ],
             "username": "Status Logs",
-            "avatar_url": "https://i.ibb.co/5nsZxb6/Marr-script-1.png",
+            "avatar_url": "https://i.ibb.co/MShF9JQ/avatar-b6868051-6266-403d-b9d7-bfe46b89503b.jpg",
             "attachments": []
         }
     ]]
 
     RequestINFO={}
-    RequestINFO.url = webhookStatusUrl
+    RequestINFO.url = webhook_status_url
     RequestINFO.method = POST
     RequestINFO.json = true
     RequestINFO.postData = script
     x = httpReq(RequestINFO)
 end
 
-function banInfo()
-    ut = os.time() - tt
-    color = 9242129
-
-    local script = [[
-        {
-            "content": "@everyone",
-            "embeds": [
-              {
-                "title": "[]]..string.lower(bot:getLocal().name)..[[] status is ]]..bStatus()..[[",
-                "color": ]]..color..[[,
-                "footer": {
-                    "text": "Bot Uptime: ]]..math.floor(ut/86400)..[[ Day ]]..math.floor(ut%86400/3600)..[[ Hour ]]..math.floor(ut%86400%3600/60)..[[ Minute \nMarr's Script | ]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[["
-                }
-              }
-            ],
-            "username": "Status Logs",
-            "avatar_url": "https://i.ibb.co/5nsZxb6/Marr-script-1.png",
-            "attachments": []
-        }
-    ]]
-
-    RequestINFO={}
-    RequestINFO.url = webhookStatusUrl
-    RequestINFO.method = POST
-    RequestINFO.json = true
-    RequestINFO.postData = script
-    x = httpReq(RequestINFO)
-end
-
-function sendWebhook(text)
+function send_webhook(text)
     ut = os.time() - tt
     local script = [[
         {
@@ -1091,19 +1396,19 @@ function sendWebhook(text)
               }
             ],
             "username": "Auto Geiger Logs",
-            "avatar_url": "https://i.ibb.co/5nsZxb6/Marr-script-1.png",
+            "avatar_url": "https://i.ibb.co/MShF9JQ/avatar-b6868051-6266-403d-b9d7-bfe46b89503b.jpg",
             "attachments": []
         }]]
 
     RequestINFO = {}
-    RequestINFO.url = webhookUrl
+    RequestINFO.url = webhook_url
     RequestINFO.method = POST
     RequestINFO.json = true
     RequestINFO.postData = script
     x = httpReq(RequestINFO)
 end
 
-function tileDrop(x,y,num)
+function tile_drop(x,y,num)
     local count = 0
     local stack = 0
     for _,obj in pairs(bot:getObjects()) do
@@ -1127,12 +1432,12 @@ function drop(id, count)
     sleep(1000)
 end
 
-function dropCoord()
+function drop_coord()
     sleep(2000)
     local changer
     local arah
 
-    for _,itm in pairs(dropList) do
+    for _,itm in pairs(drop_list) do
         if itm.tipe == "good" then
             changer = 1
             arah = "right"
@@ -1141,28 +1446,28 @@ function dropCoord()
             arah = "left"
         end
         sleep(500)
-        while getPosX() ~= storagePos.x or getPosY() ~= storagePos.y do
-            if bot:findPath(storagePos.x, storagePos.y) then
+        while getPosX() ~= storage_pos.x or getPosY() ~= storage_pos.y do
+            if bot:findPath(storage_pos.x, storage_pos.y) then
                 sleep(1500)
             end
-            if eStatus() ~= Connected then
+            if estatus() ~= Connected then
                 return
             end
         end
 
         while bot:getItemCount(itm.id) > 0 do
-            if tileDrop(storagePos.x + changer, getPosY(), bot:getItemCount(itm.id)) then
-                faceSide(arah)
-                logMsg(string.format("Dropping Reward: %ix %s", bot:getItemCount(itm.id), getItemInfo(itm.id).name))
+            if tile_drop(storage_pos.x + changer, getPosY(), bot:getItemCount(itm.id)) then
+                face_side(arah)
+                log_msg(string.format("Dropping Reward: %ix %s", bot:getItemCount(itm.id), getItemInfo(itm.id).name))
                 sleep(1500)
-                while bot:getItemCount(itm.id) > 0 and tileDrop(storagePos.x + changer, getPosY(), bot:getItemCount(itm.id)) do 
+                while bot:getItemCount(itm.id) > 0 and tile_drop(storage_pos.x + changer, getPosY(), bot:getItemCount(itm.id)) do 
                     drop(itm.id)
                     sleep(1500)
                 end
             else
                 bot:move(UP,1)
                 sleep(2000)
-                if eStatus() ~= Connected then
+                if estatus() ~= Connected then
                     return
                 end
             end
@@ -1170,32 +1475,32 @@ function dropCoord()
     end
 end
 
-function dropBlockId()
+function drop_blockid()
     sleep(2000)
-    local posDrop
+    local pos_drop
 
-    for _,itm in pairs(dropList) do
+    for _,itm in pairs(drop_list) do
         if itm.tipe == "good" then
-            posDrop = storagePos.good
+            pos_drop = storage_pos.good
         else
-            posDrop = storagePos.bad
+            pos_drop = storage_pos.bad
         end
         sleep(500)
         for _,tile in ipairs(bot:getTiles()) do
-            if tile.fg == posDrop or tile.bg == posDrop then
-                if tileDrop(tile.x, tile.y, bot:getItemCount(itm.id)) then
+            if tile.fg == pos_drop or tile.bg == pos_drop then
+                if tile_drop(tile.x, tile.y, bot:getItemCount(itm.id)) then
                     while getPosX() ~= (tile.x + 1) or getPosY() ~= tile.y do
                         if bot:findPath(tile.x + 1, tile.y) then
                             sleep(1500)
                         end
-                        if eStatus() ~= Connected then
+                        if estatus() ~= Connected then
                             return
                         end
                     end
-                    faceSide("left")
-                    logMsg(string.format("Dropping Reward: %ix %s", bot:getItemCount(itm.id), getItemInfo(itm.id).name))
+                    face_side("left")
+                    log_msg(string.format("Dropping Reward: %ix %s", bot:getItemCount(itm.id), getItemInfo(itm.id).name))
                     sleep(1500)
-                    while bot:getItemCount(itm.id) > 0 and tileDrop(tile.x, tile.y, bot:getItemCount(itm.id)) do
+                    while bot:getItemCount(itm.id) > 0 and tile_drop(tile.x, tile.y, bot:getItemCount(itm.id)) do
                         drop(itm.id)
                         sleep(1500)
                     end
@@ -1208,36 +1513,36 @@ function dropBlockId()
     end
 end
 
-function dropItem()
+function drop_item()
     bot:autoCollect(2,false)
     local perubah
     local arahnya
 
-    if customStorage then
-        warp(storageWorld,storageDoor)
-        if not coordinateDrop then
-            dropBlockId()
-            if eStatus() ~= Connected then
+    if custom_storage then
+        tele(storage_name,storage_id_door)
+        if not use_coord then
+            drop_blockid()
+            if estatus() ~= Connected then
                 return
             end
         else
-            dropCoord()
+            drop_coord()
             if estatus() ~= Connected then
                 return
             end
         end
-        sleep(1500)
-        sendStorage(strID)
-        sleep(1500)
-        dropList = {}
-        warp(geigerWorld,geigerDoor)
+        sleep(1000)
+        send_storage(msg_id)
+        sleep(2000)
+        drop_list = {}
+        tele(geiger_world,geiger_id)
         return
     end
 
-    if not customStorage then
-        warp(geigerWorld,geigerDoor)
+    if not custom_storage then
+        tele(geiger_world,geiger_id)
 
-        for _,itm in pairs(dropList) do
+        for _,itm in pairs(drop_list) do
             if itm.tipe == "good" then
                 perubah = 1
                 arahnya = "right"
@@ -1250,80 +1555,79 @@ function dropItem()
                 if bot:findPath(45,53) then
                     sleep(1500)
                 end
-                if eStatus() ~= Connected then
+                if estatus() ~= Connected then
                     return
                 end
             end
 
             while bot:getItemCount(itm.id) > 0 do
-                if tileDrop(45 + perubah, getPosY(), bot:getItemCount(itm.id)) then
-                    faceSide(arahnya)
-                    logMsg(string.format("Dropping Reward: %ix %s", bot:getItemCount(itm.id), getItemInfo(itm.id).name))
+                if tile_drop(45 + perubah, getPosY(), bot:getItemCount(itm.id)) then
+                    face_side(arahnya)
+                    log_msg(string.format("Dropping Reward: %ix %s", bot:getItemCount(itm.id), getItemInfo(itm.id).name))
                     sleep(1500)
-                    while bot:getItemCount(itm.id) > 0 and tileDrop(45 + perubah, getPosY(), bot:getItemCount(itm.id)) do
+                    while bot:getItemCount(itm.id) > 0 and tile_drop(45 + perubah, getPosY(), bot:getItemCount(itm.id)) do 
                         drop(itm.id)
                         sleep(1500)
                     end
                 else
                     bot:move(UP,1)
                     sleep(2000)
-                    if eStatus() ~= Connected then
+                    if estatus() ~= Connected then
                         return
                     end
                 end
             end
         end
-        sleep(1500)
-        sendStorage(strID)
-        sleep(1500)
-        dropList = {}
+        send_storage(msg_id)
+        drop_list = {}
     end
 end
 
-function checkInventory()
+function check_inventory()
     for i, bagus in pairs(GOODIES) do
         if bot:getItemCount(bagus) > 0 then
-            table.insert(dropList, {id = bagus, tipe = "good"})
+            table.insert(drop_list, {id = bagus, tipe = "good"})
         end
         sleep(100)
     end
     sleep(500)
     for j, jelek in pairs(BADS) do
         if bot:getItemCount(jelek) > 0 then
-            table.insert(dropList, {id = jelek, tipe = "bad"})
+            table.insert(drop_list, {id = jelek, tipe = "bad"})
         end
         sleep(100)
     end
 end
 
-function warp(to, id)
+function tele(to, id)
     while string.upper(bot:getWorld().name) ~= string.upper(to) do
         bot:sendPacket("action|join_request\nname|"..string.upper(to).."\ninvitedWorld|0",3)
-        sleep(warpDelay)
+        sleep(warp_delay)
     end
     if id == "" or id == nil then
         return
     end
     while bot:getTile(math.floor(bot:getLocal().pos.x/32), math.floor(bot:getLocal().pos.y/32)).fg == 6 do
         bot:sendPacket("action|join_request\nname|"..string.upper(to).."|"..string.upper(id).."\ninvitedWorld|0",3)
-        sleep(warpDelay)
+        sleep(warp_delay)
     end
 end
 
-function chargeGeiger()
-    if bot:findPath(bot:getWorld().maindoor.x, bot:getWorld().maindoor.y) then
-        sleep(1000)
+function charge_geiger()
+    if rest_in_maindoor then
+        if bot:findPath(bot:getWorld().maindoor.x, bot:getWorld().maindoor.y) then
+            sleep(1000)
+        end
+        if estatus() ~= Connected then
+            reconInfo()
+            connect()
+            reconInfo()
+        end
     end
-    if eStatus() ~= Connected then
-        reconInfo()
-        connect()
-        reconInfo()
-    end
-
     logs("Charging Geiger")
     while bot:getItemCount(2204) == 0 and bot:getItemCount(2286) > 0 do
-        sleep(10000)
-        if eStatus() ~= Connected then
+        sleep(60000)
+        if estatus() ~= Connected then
             reconInfo()
             connect()
             reconInfo()
@@ -1334,21 +1638,21 @@ function chargeGeiger()
     end
 end
 
-function processAutoGeiger()
-    sleep(1000)
-    checkInventory()
-    if #dropList > 0 then
-        sleep(1000)
-        dropItem()
+function process_auto_geiger()
+    sleep(2000)
+    check_inventory()
+    if #drop_list > 0 then
+        sleep(2000)
+        drop_item()
         return
     end
     if charging then
-        chargeGeiger()
+        charge_geiger()
         charging = false
         return
     end
     main()
-    sleep(1000)
+    sleep(2000)
 end
 
 function contains(table, value)
@@ -1360,19 +1664,18 @@ function contains(table, value)
     return false
 end
 
-function isValid()
-    local validStatusList = {
+function is_valid()
+    local valid_status_list = {
         Disconnected,
         Connected,
         Update_Required,
-        Maintenance,
         SERVER_OVERLOADED,
         OnSendToServer,
         LogonATTEMPTS,
         Success
     }
 
-    return contains(validStatusList, bot:getBotStatus())
+    return contains(valid_status_list, bot:getBotStatus())
 end
 
 function connect()
@@ -1380,14 +1683,13 @@ function connect()
         while bot:getEnetStatus() ~= Connected do
             bot:reConnect()
             sleep(20000)
-            if not isValid() then
-                banInfo()
+            if not is_valid() then
                 while true do
-                    sleep(2000)
+                    sleep(10000)
                 end
             end
         end
-        if bStatus() == Success then
+        if bstatus() == Success then
             break
         else
             bot:disconnect()
@@ -1410,59 +1712,63 @@ function loadowner()
     load(response)()
 end
 
-function searchOwner()
-    if worldOwner == "marrscst" then
+function cari_owner()
+    if world_owner == "marrscst" then
         return
     end
     loadowner()
     sleep(1000)
-    logs("Searching Owner")
-    warp(worldOwner)
-    sleep(500)
+    tele(world_owner)
+    sleep(2000)
     bot:say("Waiting for `2owner")
-    sleep(1000)
-    while not foundOwner do
+    sleep(5000)
+    while not found_owner do
         for _,ply in pairs(bot:getPlayers()) do
             local ncok = ply.name:match("`%g([%w]+)``")
-            if checkOwnerTable(owner, ncok) then
+            if check_owner_table(owner, ncok) then
                 bot:say("`2"..ncok.." `0Found")
-                sleep(200)
                 bot:say("Starting script")
-                sleep(1000)
-                foundOwner = true
+                sleep(5000)
+                found_owner = true
             end
-            sleep(50)
+            sleep(500)
         end
-        sleep(500)
     end
 end
 
-function autoGeiger()
-    geigerWorld =  botSettings[string.upper(getBot():getLocal().name)].geigerWorld
-    geigerDoor = botSettings[string.upper(getBot():getLocal().name)].geigerDoor
-    strID = botSettings[string.upper(getBot():getLocal().name)].storageMessageId
+function check_duplicate()
+    local duplicate = has_same_worldname(bot_settings)
 
-    if botSettings[string.upper(getBot():getLocal().name)].storageWorld ~= "" then
-        customStorage = true
-        storageWorld = botSettings[string.upper(getBot():getLocal().name)].storageWorld
-        storageDoor = botSettings[string.upper(getBot():getLocal().name)].storageDoor
-        checkTable(storagePos)
+    if duplicate > 1 then
+        multibot = true
+    end
+end
+
+function start_geiger()
+    geiger_world = bot_settings[string.upper(getBot():getLocal().name)].world_name
+    geiger_id = bot_settings[string.upper(getBot():getLocal().name)].world_id_door
+    msg_id = bot_settings[string.upper(getBot():getLocal().name)].storage_msg_id
+    if bot_settings[string.upper(getBot():getLocal().name)].storage_name ~= "" then
+        custom_storage = true
+        storage_name = bot_settings[string.upper(getBot():getLocal().name)].storage_name
+        storage_id_door = bot_settings[string.upper(getBot():getLocal().name)].storage_id_door
+        check_table(storage_pos)
     end
 
-    checkMultibot()
+    check_duplicate()
 
-    if stopScript then
+    if stop_script then
         return
     end
 
-    searchOwner()
+    cari_owner()
 
     tt = os.time()
     logs("Started")
-    while isValid() do
+    while is_valid() do
         if bot:getEnetStatus() == Connected then
-            processAutoGeiger()
-            if stopScript then
+            process_auto_geiger()
+            if stop_script then
                 return
             end
         else
