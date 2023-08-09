@@ -803,6 +803,7 @@ function cari_owner()
     if world_owner == "marrscst" then
         return
     end
+    log("Searching Owner")
     loadowner()
     sleep(1000)
     warp(world_owner)
@@ -825,6 +826,7 @@ end
 
 function main()
     cari_owner()
+    log("Started")
     take_pick()
     while true do
         for index,world in pairs(worlds) do
