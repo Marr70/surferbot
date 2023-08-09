@@ -749,7 +749,7 @@ function take_pick()
             while bot:getItemCount(98) == 0 do
                 for _,obj in pairs(bot:getObjects()) do
                     if obj.id == 98 then
-                        if bot:finPath(round(obj.x/32)-1,math.floor(obj.y/32)) then
+                        if bot:findPath(round(obj.x/32)-1,math.floor(obj.y/32)) then
                             sleep(500)
                             bot:autoCollect(3,true)
                             while bot:getItemCount(98) == 0 do
