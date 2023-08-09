@@ -376,7 +376,7 @@ function tile_drop1(x,y,num)
     local count = 0
     local stack = 0
     for _,obj in pairs(bot:getObjects()) do
-        if round(obj.x / 32) == x and math.floor(obj.y / 32) == y then
+        if round(obj.pos.x / 32) == x and math.floor(obj.pos.y / 32) == y then
             count = count + obj.count
             stack = stack + 1
         end
@@ -391,7 +391,7 @@ function tile_drop2(x,y,num)
     local count = 0
     local stack = 0
     for _,obj in pairs(bot:getObjects()) do
-        if round(obj.x / 32) == x and math.floor(obj.y / 32) == y then
+        if round(obj.pos.x / 32) == x and math.floor(obj.pos.y / 32) == y then
             count = count + obj.count
             stack = stack + 1
         end
@@ -562,7 +562,7 @@ function take(world)
         sleep(100)
         for _,obj in pairs(bot:getObjects()) do
             if obj.id == seed_id then
-                if bot:findPath(round(obj.x / 32),math.floor(obj.y / 32)) then
+                if bot:findPath(round(obj.pos.x / 32),math.floor(obj.pos.y / 32)) then
                     sleep(500)
                 end
                 collect(2)
@@ -749,7 +749,7 @@ function take_pick()
             while bot:getItemCount(98) == 0 do
                 for _,obj in pairs(bot:getObjects()) do
                     if obj.id == 98 then
-                        if bot:findPath(round(obj.x/32)-1,math.floor(obj.y/32)) then
+                        if bot:findPath(round(obj.pos.x/32)-1,math.floor(obj.pos.y/32)) then
                             sleep(500)
                             bot:autoCollect(3,true)
                             while bot:getItemCount(98) == 0 do
