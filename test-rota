@@ -59,7 +59,7 @@ end
 
 if looping then
     for i = 0,start - 1 do
-        table.insert(worlds,worldList[i])
+        table.insert(worlds,world_list[i])
     end
 end
 
