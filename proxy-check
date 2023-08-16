@@ -1,0 +1,85 @@
+str_on = ""
+str_off = ""
+str_temp = ""
+
+function logs(text)
+    local filewrite = io.open(path, "a+")
+    filewrite:write(text.."\n")
+    filewrite:close()
+end
+
+function msBot()
+    if bot:getEnetStatus() == Connected and (bot:getBotStatus() == Success or bot:getBotStatus() == BypassTutorial) then
+        Status = "online"
+    elseif bot:getBotStatus() == Suspended then
+        Status = "suspend"
+    elseif bot:getBotStatus() == Banned then
+        Status = "banned"
+    elseif bot:getBotStatus() == Wrong_Password then
+        Status = "wrong"
+    elseif bot:getBotStatus() == Update_Required then
+        Status = "update version"
+    elseif bot:getBotStatus() == Maintenance then
+        Status = "maintenance"
+    elseif bot:getBotStatus() == AAP then
+        Status = "AAP"
+    elseif bot:getBotStatus() == Unable_to_create_new_account then
+        Status = "guestError"
+    else
+        Status = "offline"
+    end
+
+    return {
+        status = Status
+    }
+end
+
+for i,proxy in pairs(proxy_list) do
+    local user,pass = acc:match("([^:]+):([^:]+)")
+    if proxy ~= "" then
+        local ip,port,u,p = proxy:match("([^:]+):([^:]+):([^:]+):([^:]+)")
+        socks5 = {
+            HostName=ip..":"..port,
+            Username=u,
+            Password=p,
+            Type=SOCKS5
+        }
+        connect(user,pass, socks5)
+    else
+        connect(user,pass)
+    end
+    sleep(500)
+    bot = getBot()
+    sleep(7000)
+    local tries = 1
+    while bot:getEnetStatus() ~= Connected do
+        bot:reConnect()
+        sleep(7000)
+        if tries < 2 then
+            tries = tries + 1
+        else
+            break
+        end
+    end
+    if msBot().status == "online"  or msBot().status == "suspend" or msBot().status == "AAP" then
+        str_on = str_on..proxy.."\n"
+    elseif msBot().status == "banned" then
+        str_temp = str_temp..proxy.."\n"
+    elseif msBot().status == "offline" then
+        str_off = str_off..proxy.."\n"
+    end
+    bot:remove()
+    sleep(2000)
+end
+
+final = [[
+[Online Proxy]
+]]..str_on..[[
+
+[Temporary Banned Proxy]
+]]..str_temp..[[
+
+[Offline Proxy]
+]]..str_off..[[
+]]
+logs(final)
