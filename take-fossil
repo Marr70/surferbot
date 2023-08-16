@@ -1,1 +1,233 @@
+bot = getBot()
+fossil = {}
+fossils = {}
+fossilKo = 0
+auto = true
 
+function round(number)
+    return number % 1 > 0.5 and math.ceil(number) or math.floor(number)
+end
+
+function hook(v)
+    if v[0] == "OnTalkBubble" then
+        if v[2]:find("unearthed") then
+            auto = false
+        end
+    end
+end
+
+function fossil_world()
+    local str = ""
+    for _,world in pairs(world_list) do
+        str = str.."\\n"..string.upper(world).." ( "..(fossil[world] or "No data").." | "..(fossils[world] or "No data").." )"
+    end
+    return str
+end
+
+function webhook(text)
+    local script = [[
+        {
+            "content": null,
+            "embeds": [
+              {
+                "title": "Fossil Logs",
+                "color": 1401472,
+                "fields": [
+                  {
+                    "name": "<:bot:1141314837222281258> ]]..string.upper(bot:getLocal().name)..[[",
+                    "value": "]]..text..[[",
+                    "inline": true
+                  },
+                  {
+                    "name": ":earth_asia: WORLD",
+                    "value": "]]..string.upper(bot:getCurrentWorld())..[[",
+                    "inline": true
+                  },
+                  {
+                    "name": "<:gscan:1141315323937701938> FOSSIL IN STORAGE",
+                    "value": "]]..fossilKo..[[",
+                    "inline": true
+                  },
+                  {
+                    "name": "<:todo_list:1138498112042832013> World List (Fossil Rock | Polished Fossil)",
+                    "value": "]]..fossil_world()..[["
+                  }
+                ],
+                "footer": {
+                    "text": "marrcats | ]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[[",
+                    "icon_url": "https://i.ibb.co/5nsZxb6/Marr-script-1.png"
+                }
+              }
+            ],
+            "attachments": []
+        }
+    ]]
+
+    RequestINFO = {}
+    RequestINFO.url = webhook_url.."/messages/"..message_id
+    RequestINFO.method = PATCH
+    RequestINFO.json = true
+    RequestINFO.postData = script
+    x = httpReq(RequestINFO)
+end
+
+function gscan(id,obj)
+    local count = 0
+    if obj then
+        for _,obj in pairs(bot:getObjects()) do 
+            if obj.id == id then 
+                count = count + obj.count 
+            end 
+        end 
+    else
+        for _,tile in ipairs(bot:getTiles()) do 
+            if tile.fg == id or tile.bg == id then 
+                count = count + 1
+            end 
+        end
+    end
+    return count
+end
+
+function warp(to, id)
+    while string.upper(bot:getWorld().name) ~= string.upper(to) do
+        bot:sendPacket("action|join_request\nname|"..string.upper(to).."\ninvitedWorld|0",3)
+        sleep(5000)
+    end
+    if id == "" or id == nil then
+        return
+    end
+    while bot:getTile(math.floor(bot:getLocal().pos.x/32), math.floor(bot:getLocal().pos.y/32)).fg == 6 do
+        bot:sendPacket("action|join_request\nname|"..string.upper(to).."|"..string.upper(id).."\ninvitedWorld|0",3)
+        sleep(5000)
+    end
+end
+
+function collect(range, exc)
+    exc = exc or 0
+    for _, object in pairs(bot:getObjects()) do
+        local posX = math.floor(object.pos.x / 32)
+        local posY = math.floor(object.pos.y / 32)
+        if bot:isInside(posX, posY, range) then
+            if object.id ~= exc then
+                bot:collectObject(object.uid)
+            end
+        end
+    end
+end
+
+function take(id,to)
+    warp(storage,door_storage)
+    while bot:getItemCount(id) == 0 do
+        for _,obj in pairs(bot:getObjects()) do
+            if obj.id == id then 
+                if bot:findPath(round(obj.pos.x/32),math.floor(obj.pos.y/32)) then
+                    sleep(300)
+                end
+                collect(3)
+                sleep(500)
+            end 
+            if bot:getItemCount(id) > 0 then 
+                break 
+            end
+        end 
+        sleep(500)
+    end
+    warp(to,door_world)
+end
+
+function drop(to)
+    warp(storage,door_storage)
+    for _,tile in ipairs(bot:getTiles()) do 
+        if tile.fg == pos_drop or tile.bg == pos_drop then 
+            if bot:findPath(tile.x-1,tile.y) then
+                sleep(500)
+            end
+            bot:drop(4134, bot:getItemCount(4134)) 
+            sleep(500)
+        end 
+        if bot:getItemCount(4134) == 0 then 
+            fossilKo = gscan(4134,true)
+            warp(to,door_world)
+            break 
+        end
+    end 
+end
+
+function wear(id)
+    local packet = {}
+    packet.type = 10
+    packet.int_data = id
+    bot:sendPacketRaw(packet)
+end
+
+function punch(x,y)
+    return bot:hitTile(math.floor(getBot():getLocal().pos.x/32) + x, math.floor(getBot():getLocal().pos.y/32) + y)
+end
+
+function place(id,x,y)
+    return bot:placeTile(math.floor(bot:getLocal().pos.x/32) + x, math.floor(bot:getLocal().pos.y/32) + y, id)
+end
+
+for i,world in pairs(world_list) do
+    warp(world,door_world)
+    if gscan(3918) > 0 then
+        a = bot:getItemCount(4134)
+        fossil[world] = gscan(3918)
+        webhook("STARTING")
+        for _,tile in ipairs(bot:getTiles()) do
+            if tile.fg == 3918 then 
+                while not bot:isEquipped(3932) do
+                    wear(3932)
+                    sleep(3000)
+                end
+                if bot:getItemCount(10) == 0 then 
+                    take(10,world)
+                    sleep(1000)
+                end 
+                if bot:getItemCount(4132) == 0 then 
+                    take(4132,world)
+                    sleep(1000)
+                end
+                if bot:findPath(tile.x,tile.y+1) then
+                    sleep(1000)
+                end
+                while bot:getTile(math.floor(bot:getLocal().pos.x/32),math.floor(bot:getLocal().pos.y/32)-1).fg == 3918 and auto do
+                    for i = 1,15 do
+                        punch(0,-1)
+                        sleep(800)
+                        if not auto then
+                        	sleep(2000)
+                        	goto done
+                        end
+                    end
+                    sleep(10000)
+                    ::done::
+                end
+                while not bot:isEquipped(3934) do
+                	wear(3934)
+                	sleep(3000)
+                end
+                while bot:getTile(math.floor(bot:getLocal().pos.x/32),math.floor(bot:getLocal().pos.y/32)-1).fg == 3918 do
+                    punch(0,-1) 
+                    sleep(250)
+                end
+                sleep(2000)
+                place(4132,0,-1)
+                sleep(1000) 
+                collect(3)
+                sleep(3000) 
+                place(10,0,-1)
+                sleep(5000)
+                auto = true
+            end 
+        end
+        fossils[world] = bot:getItemCount(4134) - a
+        if findItem(4134) > 5 then
+            drop(world)
+            sleep(3000)
+        end
+        webhook("DONE "..world)
+        sleep(200)
+    end 
+end
