@@ -1,0 +1,87 @@
+str_on = ""
+str_aap = ""
+str_sus = ""
+
+function msBot()
+    if bot:getEnetStatus() == Connected and (bot:getBotStatus() == Success or bot:getBotStatus() == BypassTutorial) then
+        Status = "online"
+    elseif bot:getBotStatus() == Suspended then
+        Status = "suspend"
+    elseif bot:getBotStatus() == Banned then
+        Status = "banned"
+    elseif bot:getBotStatus() == Wrong_Password then
+        Status = "wrong"
+    elseif bot:getBotStatus() == Update_Required then
+        Status = "update version"
+    elseif bot:getBotStatus() == Maintenance then
+        Status = "maintenance"
+    elseif bot:getBotStatus() == AAP then
+        Status = "AAP"
+    elseif bot:getBotStatus() == Unable_to_create_new_account then
+        Status = "guestError"
+    else
+        Status = "offline"
+    end
+
+    return {
+        status = Status
+    }
+end
+
+function logs(text)
+    local filewrite = io.open(path, "a+")
+    filewrite:write(text.."\n")
+    filewrite:close()
+end
+
+for i,acc in pairs(list_acc) do
+    local user,pass = acc:match("([^:]+):([^:]+)")
+    if useProxy then
+        local ip,port,u,p = proxy:match("([^:]+):([^:]+):([^:]+):([^:]+)")
+        local prongsi = {
+            HostName= ip..":"..port,
+            Username= u,
+            Password= p,
+            Type=SOCKS5
+        }
+        connect(user,pass,prongsi)
+    else
+        connect(user,pass)
+    end
+    sleep(500)
+    bot = getBot()
+    sleep(7000)
+    local tries = 2
+    while bot:getEnetStatus() ~= Connected do
+        bot:reConnect()
+        sleep(7000)
+        if tries < 2 then
+            tries = tries + 1
+        else
+            break
+        end
+    end
+
+    if msBot().status == "online" then
+        str_on = str_on..acc.."\n"
+    elseif msBot().status == "AAP" then
+        str_aap = str_aap..acc.."\n"
+    elseif msBot().status == "suspend" then
+        str_sus = str_sus..acc.."\n"
+    end
+    bot:remove()
+    sleep(1500)
+end
+
+final = [[
+[Online Bots]
+]]..str_on..[[
+    
+[AAP Bots]
+]]..str_aap..[[
+
+[Suspended Bots]
+]]..str_sus..[[
+]]
+
+logs(final)
