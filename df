@@ -1,0 +1,545 @@
+bot = getBot()
+
+requirement = {2,226,lock,door,entrance}
+goods = {}
+
+for _,all in pairs(dont_trash) do
+    table.insert(goods, all)
+end
+
+locks = {242,9640,202,204,206,1796,4994,7188,408,2950,4428,4802 ,5814,5260,5980,8470,10410,11550,11586}
+
+function reconnect(world,id,x,y)
+    if bot:getEnetStatus() ~= Connected then
+        sleep(100)
+        konek = 0
+        while true do
+            bot:reConnect()
+            sleep(10000)
+            if bot:getBotStatus() == Suspended or bot:getBotStatus() == Banned then
+                sleep(100)
+                while true do
+                    sleep(10000)
+                end
+            end
+            while bot:getEnetStatus() == Connected and bot:getBotStatus() == Success and string.upper(bot:getCurrentWorld()) ~= string.upper(world) do
+                bot:sendPacket("action|join_request\nname|"..string.upper(world).."\ninvitedWorld|0",3)
+                sleep(5000)
+            end
+            if bot:getEnetStatus() == Connected and bot:getBotStatus() == Success and string.upper(bot:getCurrentWorld()) == string.upper(world) then
+                if id and id ~= "" then
+                    while bot:getTile(math.floor(bot:getLocal().pos.x/32), math.floor(bot:getLocal().pos.y/32)).fg == 6 do
+                        bot:sendPacket("action|join_request\nname|"..string.upper(world).."|"..string.upper(id).."\ninvitedWorld|0",3)
+                        sleep(3000)
+                    end
+                end
+                if x and y and bot:getEnetStatus() == Connected and bot:getBotStatus() == Success and string.upper(bot:getCurrentWorld()) == string.upper(world) then
+                    while math.floor(bot:getLocal().pos.x/32) ~= x or math.floor(bot:getLocal().pos.y/32) ~= y do
+                        if bot:findPath(x,y) then
+                            sleep(1000)
+                        end
+                    end
+                end
+                if bot:getEnetStatus() == Connected and bot:getBotStatus() == Success and string.upper(bot:getCurrentWorld()) == string.upper(world) then
+                    if x and y then
+                        if bot:getEnetStatus() == Connected and bot:getBotStatus() == Success and math.floor(bot:getLocal().pos.x/32) == x and math.floor(bot:getLocal().pos.y/32) == y then
+                            break
+                        end
+                    elseif bot:getEnetStatus() == Connected and bot:getBotStatus() == Success then
+                        break
+                    end
+                end
+            end
+            if konek < 20 then
+                konek = konek + 1
+            else
+                sleep(10*60000)
+                konek = 0
+            end
+        end
+        sleep(100)
+    end
+end
+
+function round(n)
+    return n % 1 > 0.5 and math.ceil(n) or math.floor(n)
+end
+
+function getposx()
+    return math.floor(bot:getLocal().pos.x/32)
+end
+
+function getposy()
+    return math.floor(bot:getLocal().pos.y/32)
+end
+
+function place(id,x,y)
+    return bot:placeTile(getposx() + x, getposy() + y, id)
+end
+
+function punch(x,y)
+    return bot:hitTile(getposx() + x, getposy() + y)
+end
+
+function logs(text)
+    local filewrite = io.open("world_list.txt", "a+")
+    filewrite:write(text.."\n")
+    filewrite:close()
+end
+
+function change(id,x,y)
+    bot:wrenchTile(x,y)
+    sleep(1000)
+    bot:sendPacket("action|dialog_return\ndialog_name|door_edit\ntilex|"..x.."|\ntiley|"..y.."|\ndoor_name|marrcats\ndoor_target|\ndoor_id|"..id, 2)
+end
+
+function reapply(x,y)
+    bot:wrenchTile(x,y)
+    sleep(500)
+    bot:sendPacket("action|dialog_return\ndialog_name|lock_edit\ntilex|"..x.."|\ntiley|"..y.."|\nbuttonClicked|recalcLock\n\ncheckbox_public|0\ncheckbox_ignore|1",2)
+end
+
+function reapplywl(x,y)
+    bot:wrenchTile(x,y)
+    sleep(500)
+    bot:sendPacket("action|dialog_return\ndialog_name|lock_edit\ntilex|"..x.."|\ntiley|"..y.."|\ncheckbox_public|1\ncheckbox_disable_music|0\ntempo|100\ncheckbox_disable_music_render|0\ncheckbox_set_as_home_world|0\nminimum_entry_level|1",2)
+end
+
+function face_side(direction)
+    local packet = {}
+    packet.type = 0
+    if direction == "left" then
+        packet.flags = 48
+    elseif direction == "right" then
+        packet.flags = 32
+    end
+    packet.pos_x = bot:getLocal().pos.x
+    packet.pos_y = bot:getLocal().pos.y
+    bot:sendPacketRaw(packet)
+end
+
+function tile_drop(x,y,num)
+    local count = 0
+    local stack = 0
+    for _,obj in pairs(bot:getObjects()) do
+        if round(obj.pos.x / 32) == x and math.floor(obj.pos.y / 32) == y then
+            count = count + obj.count
+            stack = stack + 1
+        end
+    end
+    if stack < 20 and count <= (4000 - num) then
+        return true
+    end
+    return false
+end
+
+function drop(id, count)
+    if count == nil then
+        count = bot:getItemCount(id)
+    end
+    bot:sendPacket("action|drop\n|itemID|"..id, 2)
+    bot:sendPacket("action|dialog_return\ndialog_name|drop_item\nitemID|"..id.."|\ncount|"..count, 2)
+    sleep(1000)
+end
+
+function drop_dirt(world)
+    bot:autoCollect(3,false)
+    sleep(200)
+    warp(world_take,id_world_take)
+    sleep(200)
+    for _,obj in pairs(bot:getObjects()) do
+        if obj.id == 2 then
+            if bot:findPath(round(obj.pos.x / 32)-1, math.floor(obj.pos.y / 32)) then
+                sleep(200)
+            end
+            break
+        end
+    end
+    while bot:getItemCount(2) > 0 do
+        if tile_drop(getposx()+1,getposy(), bot:getItemCount(2)) then
+            face_side("right")
+            sleep(1000)
+            while bot:getItemCount(2) > 0 and tile_drop(getposx()+1,getposy(), bot:getItemCount(2)) do
+                drop(2)
+                sleep(1500)
+            end
+        else
+            bot:move(RIGHT,1)
+            sleep(2000)
+        end
+    end
+    sleep(200)
+    warp(world,id_door)
+    sleep(200)
+    bot:autoCollect(3,true)
+end
+
+function includes_number(table, number)
+    for _,num in pairs(table) do
+        if num == number then
+            return true
+        end
+    end
+    return false
+end
+
+function clear()
+    for _,item in pairs(bot:getInventory()) do
+        if not includes_number(goods, item.id) then
+            bot:sendPacket("action|trash\n|itemID|"..item.id, 2)
+            bot:sendPacket("action|dialog_return\ndialog_name|trash_item\nitemID|"..item.id.."|\ncount|"..item.count, 2)
+            sleep(500)
+        end
+    end
+end
+
+function break_left(world)
+    for y = 1,53 do
+        for x = 0,1 do
+            if bot:getTile(x,y).fg ~= 0 or bot:getTile(x,y).bg ~= 0 then
+                if bot:findPath(x,y-1) then
+                    sleep(200)
+                    while bot:getTile(getposx(),getposy()+1).fg ~= 0 or bot:getTile(getposx(), getposy()+1).bg ~= 0 do 
+                        punch(0,1)
+                        sleep(180)
+                        reconnect(world,id_door,x,y)
+                    end
+                end 
+            end
+            if bot:getItemCount(2) > 190 then
+                drop_dirt(world)
+            end
+            if bot:getItemCount(3) >= 190 or bot:getItemCount(15) >= 190 then
+            	clear()
+            end
+        end 
+    end 
+end
+
+function break_right(world)
+    for y = 1,53 do 
+        for x = 98,99 do 
+            if bot:getTile(x,y).fg ~= 0 or bot:getTile(x,y).bg ~= 0 then
+                if bot:findPath(x,y-1) then
+                    sleep(200)
+                    while bot:getTile(getposx(),getposy()+1).fg ~= 0 or bot:getTile(getposx(),getposy()+1).bg ~= 0 do 
+                        punch(0,1)
+                        sleep(180)
+                        reconnect(world,id_door,x,y)
+                    end
+                end 
+            end 
+            if bot:getItemCount(2) > 190 then
+                drop_dirt(world)
+            end
+            if bot:getItemCount(3) >= 190 or bot:getItemCount(15) >= 190 then
+            	clear()
+            end
+        end 
+    end 
+end
+
+function break_mid(world)
+    for y = 1,53,2 do
+        for x = 2,97 do 
+            if (bot:getTile(x,y).fg ~= 0 and bot:getTile(x,y).fg ~= 8 and bot:getTile(x,y).fg ~= 6 and y ~= 23) or bot:getTile(x,y).bg ~= 0 then 
+                if bot:findPath(x-1,y) then 
+                    sleep(200)
+                    while bot:getTile(getposx()+1,getposy()).fg ~= 0 or bot:getTile(getposx()+1,getposy()).bg ~= 0 do
+                        punch(1,0)
+                        sleep(180)
+                        reconnect(world,id_door,x,y)
+                    end
+                end 
+            end 
+            if bot:getItemCount(2) > 190 then
+                drop_dirt(world)
+            end
+            if bot:getItemCount(3) >= 190 or bot:getItemCount(15) >= 190 then
+            	clear()
+            end
+        end 
+    end 
+end
+
+function plat_left(world)
+    for y = 2,53,2 do 
+        if bot:getTile(1,y).fg == 0 and bot:getTile(1,y).bg == 0 then
+            if bot:getItemCount(platform) == 0 then
+                take(platform, world)
+            end
+            if bot:findPath(1,y-1) then
+                sleep(200)
+                while bot:getTile(1,y).fg ~= platform do 
+                    place(platform,0,1)
+                    sleep(200)
+                    reconnect(world,id_door,1,y)
+                end
+            end
+        end
+    end
+end
+
+function plat_right(world)
+    for y = 2,53,2 do 
+        if bot:getTile(98,y).fg == 0 and bot:getTile(98,y).bg == 0 then
+            if bot:getItemCount(platform) == 0 then
+                take(platform, world)
+            end
+            if bot:findPath(98,y-1) then
+                sleep(200)
+                while bot:getTile(98,y).fg ~= platform do 
+                    place(platform,0,1)
+                    sleep(200)
+                    reconnect(world,id_door,98,y)
+                end 
+            end 
+        end 
+    end 
+end
+
+function break_lava(world)
+    for _,tile in ipairs(bot:getTiles()) do 
+        if tile.fg == 4 then 
+            if bot:findPath(tile.x,tile.y-1) then
+                sleep(200)
+                while bot:getTile(tile.x,tile.y).fg == 4 do
+                    punch(0,1)
+                    sleep(200)
+                    reconnect(world,id_door,tile.x,tile.y)
+                end 
+            end
+        end 
+    end 
+end
+
+function place_dirt(world)
+    for y = 2,52,2 do 
+        for x = 2,97 do
+            if bot:getTile(x,y).fg == 0 then 
+                if bot:getItemCount(2) == 0 then
+                    take(2, world)
+                end
+                if bot:findPath(x,y-1) then 
+                    sleep(200)
+                    while bot:getTile(x,y).fg == 0 do 
+                        place(2,0,1) 
+                        sleep(200)
+                        reconnect(world,id_door,x,y)
+                    end 
+                end 
+            end 
+        end 
+    end
+end
+
+function takes(world)
+    sleep(100)
+    for _,id in pairs(requirement) do
+        while bot:getItemCount(id) == 0 do
+            bot:autoCollect(3,false)
+            sleep(100)
+            warp(world_take,id_world_take)
+            sleep(200)
+            clear()
+            sleep(500)
+            for _,obj in pairs(bot:getObjects()) do
+                if obj.id == id then
+                    if bot:findPath(round(obj.pos.x / 32), math.floor(obj.pos.y / 32)) then
+                        sleep(500)
+                    end
+                    collect(2)
+                    sleep(1000)
+                end
+                if bot:getItemCount(id) > 0 then
+                    break
+                end
+            end
+        end
+    end
+    warp(world)
+    sleep(200)
+    bot:autoCollect(3,true)
+end
+
+break_tile = {
+    {x = -2, y = -2},
+    {x = -1, y = -2},
+    {x = 0, y = -2},
+    {x = 1, y = -2},
+    {x = 2, y = -2},
+    {x = -2, y = 0},
+    {x = 2, y = 0},
+    {x = -2, y = 2},
+    {x = -1, y = 2},
+    {x = 0, y = 2},
+    {x = 1, y = 2},
+    {x = 2, y = 2},
+    {x = 1, y = 1},
+    {x = 2, y = 1},
+    {x = -2, y = 1}
+}
+
+fill_tile = {
+    {x = -2, y = -1},
+    {x = 1, y = -1},
+    {x = 2, y = -1}
+}
+
+function setting_door()
+    for _,tile in ipairs(bot:getTiles()) do
+        if tile.fg == 6 then
+            for _,bt in pairs(break_tile) do
+                while bot:getTile(tile.x + bt.x, tile.y + bt.y).fg ~= 0 or bot:getTile(tile.x + bt.x, tile.y + bt.y).bg ~= 0 do
+                    bot:hitTile(tile.x + bt.x, tile.y + bt.y)
+                    sleep(200)
+                end
+            end
+        end
+    end
+    sleep(500)
+    place(226,-1,-1)
+    sleep(1500)
+    punch(-1,-1)
+    sleep(1000)
+    place(entrance,1,0)
+    sleep(500)
+    place(entrance,-1,0)
+    sleep(1000)
+    bot:move(RIGHT,1)
+    sleep(1000)
+    bot:move(DOWN,1)
+    sleep(1000)
+    place(door,0,0)
+    sleep(2000)
+    change(id_door,getposx(),getposy())
+    sleep(500)
+    bot:move(UP,1)
+    sleep(1000)
+    bot:move(LEFT,1)
+    sleep(1000)
+    for _,tile in ipairs(bot:getTiles()) do
+        if tile.fg == 6 then
+            for _,ft in pairs(fill_tile) do
+                if bot:getTile(tile.x + ft.x, tile.y + ft.y).fg == 0 then
+                    bot:placeTile(tile.x + ft.x, tile.y + ft.y, 2)
+                    sleep(500)
+                end
+            end
+        end
+    end
+    sleep(1000)
+    place(202,0,-1)
+    sleep(500)
+    reapply(getposx(),getposy()-1)
+    sleep(1000)
+end
+
+function warp(to, id)
+    while string.upper(bot:getWorld().name) ~= string.upper(to) do
+        bot:sendPacket("action|join_request\nname|"..string.upper(to).."\ninvitedWorld|0",3)
+        sleep(6000)
+    end
+    if id == "" or id == nil then
+        return
+    end
+    while bot:getTile(math.floor(bot:getLocal().pos.x/32), math.floor(bot:getLocal().pos.y/32)).fg == 6 do
+        bot:sendPacket("action|join_request\nname|"..string.upper(to).."|"..string.upper(id).."\ninvitedWorld|0",3)
+        sleep(6000)
+    end
+end
+
+function collect(range, itemId)
+    for _, object in pairs(bot:getObjects()) do
+        local posX = math.floor(object.pos.x / 32)
+        local posY = math.floor(object.pos.y / 32)
+        if bot:isInside(posX, posY, range) then
+            if itemId == nil or object.id == itemId then
+                bot:collectObject(object.uid)
+            end
+        end
+    end
+end
+
+function take(id, world)
+    sleep(100)
+    while bot:getItemCount(id) == 0 do
+        bot:autoCollect(3,false)
+        sleep(100)
+        warp(world_take,id_world_take)
+        sleep(200)
+        for _,obj in pairs(bot:getObjects()) do
+            if obj.id == id then
+                if bot:findPath(round(obj.pos.x / 32), math.floor(obj.pos.y / 32)) then
+                    sleep(500)
+                end
+                collect(2)
+                sleep(1000)
+            end
+            if bot:getItemCount(id) > 0 then
+                break
+            end
+        end
+        warp(world,id_door)
+        sleep(200)
+        bot:autoCollect(3,true)
+    end
+end
+
+function random_name(length)
+    local letters = "abcdefghijklmnopqrstuvwxyz1234567890"
+    local name = ""
+    for i = 1, length do
+        local index = math.random(#letters)
+        name = name .. string.sub(letters, index, index)
+    end
+    return name
+end
+
+function main()
+    while true do 
+        namewurld = random_name(letter)
+        sleep(500)
+        warp(namewurld)
+        locked = false
+        for _,tile in ipairs(bot:getTiles()) do
+            for _,i in pairs(locks) do
+                if tile.fg == i then
+                    sleep(200)
+                    locked = true
+                end
+            end
+        end
+        if not locked then
+            logs(namewurld)
+            sleep(500)
+            break
+        end
+    end
+    takes(namewurld)
+    sleep(1000)
+    setting_door(namewurld)
+    sleep(1000)
+    warp(namewurld, id_door)
+    sleep(500)
+    bot:autoCollect(3,true)
+    break_left(namewurld)
+    sleep(1000)
+    break_right(namewurld)
+    sleep(1000)
+    break_mid(namewurld)
+    sleep(1000)
+    plat_left(namewurld)
+    sleep(1000)
+    plat_right(namewurld)
+    sleep(1000)
+    break_lava(namewurld)
+    sleep(1000)
+    place_dirt(namewurld)
+    sleep(1000)
+end
+
+log("Started")
+for i = 1, total_world do
+    main()
+end
