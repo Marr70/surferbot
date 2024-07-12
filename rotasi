@@ -1,1 +1,1114 @@
-bot=getBot()worlds={}fossil={}tileBreak={}tree={}treeun={}profit=0 t=os.time()countSeed=0 blacklistTile=false worldList=Bot[(bot:getLocal()).name:upper()].farmList start=Bot[(bot:getLocal()).name:upper()].startFrom stop=#Bot[(bot:getLocal()).name:upper()].farmList doorFarm=Bot[(bot:getLocal()).name:upper()].doorFarm tileNumber=Bot[(bot:getLocal()).name:upper()].tileNumber customPNB=Bot[(bot:getLocal()).name:upper()].customPNB customX=Bot[(bot:getLocal()).name:upper()].customX customY=Bot[(bot:getLocal()).name:upper()].customY autoPickaxe=Bot[(bot:getLocal()).name:upper()].autoPickaxe pickStorage=Bot[(bot:getLocal()).name:upper()].pickStorage doorPick=Bot[(bot:getLocal()).name:upper()].doorPick for V=start,stop,1 do table.insert(worlds,worldList[V])end if looping then for V=0,start-1,1 do table.insert(worlds,worldList[V])end end for V,t in pairs(packList)do table.insert(goods,t)end for V=math.floor(tileNumber/2),1,-1 do V=V*-1 table.insert(tileBreak,V)end for V=0,math.ceil(tileNumber/2)-1,1 do table.insert(tileBreak,V)end function bl(V)blist={}fossil[V:upper()]=0 for t,l in ipairs(bot:getTiles({skip=true}))do if l.fg==6 then doorX=l.x doorY=l.y elseif l.fg==3918 then fossil[V:upper()]=fossil[V:upper()]+1 end end if blacklistTile then for V,t in pairs(blacklist)do table.insert(blist,{x=doorX+t.x,y=doorY+t.y})end end end function tilePunch(V,t)for l,U in pairs(tileBreak)do if(bot:getTile(V-1,t+U)).fg~=0 or(bot:getTile(V-1,t+U)).bg~=0 then return true end end return false end function tilePlace(V,t)for l,U in pairs(tileBreak)do if(bot:getTile(V-1,t+U)).fg==0 and(bot:getTile(V-1,t+U)).bg==0 then return true end end return false end function warp(V,t)while(bot:getWorld()).name:upper()~=V:upper()do bot:sendPacket("\097\099\116\105\111\110\124\106\111\105\110\095\114\101\113\117\101\115\116\n\110\097\109\101\124"..(V:upper().."\n\105\110\118\105\116\101\100\087\111\114\108\100\124\048"),3)sleep(delayJoinWorld)reconnect(V,t)end if t~=""and t~=nil then while(bot:getTile(math.floor((bot:getLocal()).pos.x/32),math.floor((bot:getLocal()).pos.y/32))).fg==6 do bot:sendPacket("\097\099\116\105\111\110\124\106\111\105\110\095\114\101\113\117\101\115\116\n\110\097\109\101\124"..(V:upper()..("\124"..(t:upper().."\n\105\110\118\105\116\101\100\087\111\114\108\100\124\048"))),3)sleep(delayJoinWorld)reconnect(V,t)end end end function countWorld(V)tree[V:upper()]=0 treeun[V:upper()]=0 if bot:inWorld()then for t,l in ipairs(bot:getTiles({skip=true}))do if l.fg==seedId and bot:hasAccessToTile(l.x,l.y)then if bot:canHarvest(l.x,l.y)then tree[V:upper()]=tree[V:upper()]+1 else treeun[V:upper()]=treeun[V:upper()]+1 end end end end end function botInfo(V)te=os.time()-t fossill=fossil[(bot:getWorld()).name:upper()]or 0 local l="    \123\n        \"\099\111\110\116\101\110\116\"\058 \110\117\108\108\044\n        \"\101\109\098\101\100\115\"\058 \091\n        \123\n            \"\116\105\116\108\101\"\058 \"\082\111\116\097\116\105\111\110 \083\099\114\105\112\116 \066\121 \079\109\110\105\115\099\105\117\115\"\044\n            \"\099\111\108\111\114\"\058 \049\054\051\055\055\048\050\048\044\n            \"\102\105\101\108\100\115\"\058 \091\n            \123\n                \"\110\097\109\101\"\058 \"\084\065\083\075 \073\078\070\079\082\077\065\084\073\079\078\"\044\n                \"\118\097\108\117\101\"\058 \"\060\058\100\117\098\115\116\101\112\058\049\050\053\054\049\050\049\052\055\055\050\052\050\050\057\048\050\052\055\062 \124 \067\117\114\114\101\110\116 \084\097\115\107 \058 "..(V..("\092\110\060\058\099\114\121\115\116\097\108\099\108\111\099\107\058\049\050\053\054\049\050\048\051\056\054\048\056\049\051\057\048\054\048\052\062 \124 \085\112\116\105\109\101 \058 "..(math.floor(te/86400)..(" \068\097\121\115 "..(math.floor((te%86400)/3600)..(" \072\111\117\114\115 "..(math.floor(((te%86400)%3600)/60)..(" \077\105\110\117\116\101\115\"\n            \125\044\n            \123\n                \"\110\097\109\101\"\058 \"\066\079\084 \073\078\070\079\082\077\065\084\073\079\078\"\044\n                \"\118\097\108\117\101\"\058 \"\060\058\055\053\055\055\110\097\109\101\116\097\103\058\049\050\053\054\049\049\054\056\050\055\050\054\057\049\048\051\055\049\054\062 \124 \066\111\116 \078\097\109\101 \058 \124\124"..((bot:getLocal()).name:upper()..("\124\124\092\110\060\058\101\120\112\101\114\105\101\110\099\101\058\049\050\053\054\049\052\049\057\048\056\048\055\048\051\055\049\052\050\057\062 \124 \066\111\116 \076\101\118\101\108 \058 "..((bot:getLocal()).level..("\092\110\060\058\116\114\097\105\110\101\058\049\050\053\054\049\052\050\054\048\052\050\054\054\049\049\053\048\057\050\062 \124 \066\111\116 \083\116\097\116\117\115 \058 "..(statusBot()..(" \040"..(bot:getMs()..("\041\092\110\060\058\103\101\109\115\058\049\050\053\054\049\052\050\056\054\048\050\054\053\052\053\057\055\056\054\062 \124 \066\111\116 \071\101\109\115 \058 "..((bot:getLocal()).gems..("\"\n            \125\044\n            \123\n                \"\110\097\109\101\"\058 \"\087\079\082\076\068 \073\078\070\079\082\077\065\084\073\079\078\"\044\n                \"\118\097\108\117\101\"\058 \"\060\058\099\104\101\099\107\109\097\114\107\058\049\050\053\054\049\052\049\051\055\057\049\056\053\050\055\056\057\056\056\062 \124 \087\111\114\108\100 \079\114\100\101\114 \058 "..(start..(" \047 "..(stop..("\092\110\060\058\103\108\111\098\101\058\049\050\053\054\049\052\048\057\057\051\056\056\056\050\053\054\048\057\049\062 \124 \067\117\114\114\101\110\116 \087\111\114\108\100 \058 \124\124"..((bot:getWorld()).name:upper()..("\124\124\092\110\060\058\102\111\115\115\105\108\058\049\050\053\054\049\051\057\056\052\057\055\048\055\050\057\052\055\054\048\062 \124 \070\111\115\115\105\108 \058 "..(fossill..("\092\110\060\058\114\101\097\100\121\058\049\050\053\054\049\051\057\050\054\049\051\054\055\057\052\055\050\057\052\062 \124 \084\114\101\101 \082\101\097\100\121 \058 "..((tree[(bot:getWorld()).name:upper()]or"\063")..("\092\110\060\058\117\110\114\101\097\100\121\058\049\050\053\054\049\051\056\052\049\048\051\056\057\054\055\049\057\054\054\062 \124 \084\114\101\101 \085\110\114\101\097\100\121 \058 "..((treeun[(bot:getWorld()).name:upper()]or"\063")..("\"\n            \125\044\n            \123\n                \"\110\097\109\101\"\058 \"\083\084\079\082\065\071\069 \073\078\070\079\082\077\065\084\073\079\078\"\044\n                \"\118\097\108\117\101\"\058 \"\060\058\118\097\117\108\116\058\049\050\053\054\049\051\048\053\053\048\050\051\048\053\052\056\054\051\049\062 \124 \080\114\111\102\105\116 \080\097\099\107 \058 "..(profit..("\092\110"..(itemInfo()..(" \124 \084\111\116\097\108 \083\101\101\100 \058 "..(countSeed..("\"\n            \125\044\n            \123\n                \"\110\097\109\101\"\058 \"\065\066\079\085\084 \083\067\082\073\080\084\"\044\n                \"\118\097\108\117\101\"\058 \"\060\058\052\049\053\054\052\099\114\111\119\110\111\114\097\110\103\101\058\049\050\053\054\049\050\057\055\050\052\057\056\048\050\054\053\048\051\049\062\124 \083\099\114\105\112\116 \079\119\110\101\114 \058 \060\064\049\049\051\051\054\050\056\053\054\056\055\048\050\056\049\054\051\055\057\062\092\110\060\058\100\105\115\099\058\049\050\053\054\049\050\056\054\057\050\057\055\053\057\054\048\049\051\055\062 \124 \068\105\115\099\111\114\100 \083\101\114\118\101\114 \058 \104\116\116\112\115\058\047\047\100\105\115\099\111\114\100\046\103\103\047\088\071\122\069\097\082\086\072\084\107\"\n            \125\n            \093\044\n            \"\102\111\111\116\101\114\"\058 \123\n            \"\116\101\120\116\"\058 \""..(os.date("\033\037\097 \037\098 \037\100\044 \037\089 \097\116 \037\073\058\037\077 \037\112",os.time()+25200).."\"\n            \125\n        \125\n        \093\044\n        \"\117\115\101\114\110\097\109\101\"\058 \"\079\109\110\105\115\099\105\117\115 \083\099\114\105\112\116\"\044\n        \"\097\116\116\097\099\104\109\101\110\116\115\"\058 \091\093\n    \125")))))))))))))))))))))))))))))))))))))local U={url=webhookMain..("\047\109\101\115\115\097\103\101\115\047"..messageId);method=PATCH,json=true,postData=l}httpReq(U)end function reconInfo()local V="        \123\n        \"\099\111\110\116\101\110\116\"\058 \"\124\124"..((bot:getLocal()).name..("\124\124 \115\116\097\116\117\115 \105\115 "..(statusBot().." \064\101\118\101\114\121\111\110\101\"\044\n        \"\101\109\098\101\100\115\"\058 \110\117\108\108\044\n        \"\117\115\101\114\110\097\109\101\"\058 \"\079\109\110\105\115\099\105\117\115 \083\099\114\105\112\116\"\044\n        \"\097\116\116\097\099\104\109\101\110\116\115\"\058 \091\093\n    \125\n    ")))local t={url=webhookStatus,method=POST,json=true,postData=V}httpReq(t)end function statusBot()bot=getBot()if bot:getEnetStatus()==Connected and bot:getBotStatus()==Success then Status="\111\110\108\105\110\101"elseif bot:getBotStatus()==Suspended then Status="\115\117\115\112\101\110\100\101\100"elseif bot:getBotStatus()==Banned then Status="\098\097\110\110\101\100"elseif bot:getBotStatus()==Wrong_Password then Status="\119\114\111\110\103"elseif bot:getBotStatus()==Update_Required then Status="\117\112\100\097\116\101 \118\101\114\115\105\111\110"elseif bot:getBotStatus()==Maintenance then Status="\109\097\105\110\116\101\110\097\110\099\101"elseif bot:getBotStatus()==AAP then Status="\065\065\080"elseif bot:getBotStatus()==Unable_to_create_new_account then Status="\103\117\101\115\116\069\114\114\111\114"else Status="\111\102\102\108\105\110\101"end return Status end function reconnect(V,t,l,U)if statusBot()~="\111\110\108\105\110\101"then botInfo("\082\101\099\111\110\110\101\099\116\105\110\103")sleep(100)reconInfo()sleep(100)konek=0 while true do bot:reConnect()sleep(15000)if statusBot()=="\115\117\115\112\101\110\100\101\100"or statusBot()=="\098\097\110\110\101\100"then botInfo(statusBot())sleep(100)reconInfo()sleep(100)while true do sleep(10000)end end while statusBot()=="\111\110\108\105\110\101"and(bot:getWorld()).name:upper()~=V:upper()do bot:sendPacket("\097\099\116\105\111\110\124\106\111\105\110\095\114\101\113\117\101\115\116\n\110\097\109\101\124"..(V:upper().."\n\105\110\118\105\116\101\100\087\111\114\108\100\124\048"),3)sleep(delayJoinWorld)end if statusBot()=="\111\110\108\105\110\101"and(bot:getWorld()).name:upper()==V:upper()then if t then while(bot:getTile(math.floor((bot:getLocal()).pos.x/32),math.floor((bot:getLocal()).pos.y/32))).fg==6 do bot:sendPacket("\097\099\116\105\111\110\124\106\111\105\110\095\114\101\113\117\101\115\116\n\110\097\109\101\124"..(V:upper()..("\124"..(t:upper().."\n\105\110\118\105\116\101\100\087\111\114\108\100\124\048"))),3)sleep(delayJoinWorld)end end if l and(U and(statusBot()=="\111\110\108\105\110\101"and(bot:getWorld()).name:upper()==V:upper()))then while math.floor((bot:getLocal()).pos.x/32)~=l or math.floor((bot:getLocal()).pos.y/32)~=U do if not bot:isInside(l,U,0)and#bot:getPath(l,U)>0 then bot:findPath(l,U)sleep(200)end end end if statusBot()=="\111\110\108\105\110\101"and(bot:getWorld()).name:upper()==V:upper()then if l and U then if statusBot()=="\111\110\108\105\110\101"and(math.floor((bot:getLocal()).pos.x/32)==l and math.floor((bot:getLocal()).pos.y/32)==U)then break end elseif statusBot()=="\111\110\108\105\110\101"then break end end end if konek<20 then konek=konek+1 else botInfo("\077\097\120 \082\101\099\111\110\110\101\099\116 \065\116\116\101\109\112\116 \082\101\097\099\104\101\100\033 \087\097\105\116\105\110\103 \102\111\114 "..(math.floor(16.666666666667)/100 .." \077\105\110\117\116\101\115"))sleep(600000)konek=0 botInfo("\082\101\099\111\110\110\101\099\116\105\110\103")sleep(100)end end botInfo("\083\117\099\099\101\115\102\117\108\108\121 \082\101\099\111\110\110\101\099\116\101\100")sleep(100)reconInfo()sleep(100)botInfo("\070\097\114\109\105\110\103")sleep(100)end end function findItem(V)return bot:getItemCount(V)end function round(V)return V%1>.5 and math.ceil(V)or math.floor(V)end function tileDrop1(V,t,l)local U=0 local B=0 for l,u in pairs(bot:getObjects())do if round(u.pos.x/32)==V and math.floor(u.pos.y/32)==t then U=U+u.count B=B+1 end end if B<20 and U<=4000-l then return true end return false end function tileDrop2(V,t,l)local U=0 local B=0 for l,u in pairs(bot:getObjects())do if round(u.pos.x/32)==V and math.floor(u.pos.y/32)==t then U=U+u.count B=B+1 end end if U<=4000-l then return true end return false end function storePack()for V,t in pairs(packList)do for V,l in ipairs(bot:getTiles({skip=true}))do if l.fg==patokanPack or l.bg==patokanPack then if tileDrop1(l.x,l.y,findItem(t))then while math.floor((bot:getLocal()).pos.x/32)~=l.x+1 or math.floor((bot:getLocal()).pos.y/32)~=l.y do bot:findPath(l.x+1,l.y)sleep(1000)reconnect(packStorage,doorPack,l.x+1,l.y)end while findItem(t)>0 and tileDrop1(l.x,l.y,findItem(t))do bot:sendPacket("\097\099\116\105\111\110\124\100\114\111\112\n\124\105\116\101\109\073\068\124"..t,2)sleep(1250)bot:sendPacket("\097\099\116\105\111\110\124\100\105\097\108\111\103\095\114\101\116\117\114\110\n\100\105\097\108\111\103\095\110\097\109\101\124\100\114\111\112\095\105\116\101\109\n\105\116\101\109\073\068\124"..(t..("\124\n\099\111\117\110\116\124"..findItem(t))),2)sleep(1250)reconnect(packStorage,doorPack,l.x-1,l.y)end end end if findItem(t)==0 then break end end end end function itemInfo()if seedId==4585 then emote="\060\058\112\101\112\112\101\114\115\058\049\050\053\054\049\051\054\057\049\051\049\049\049\051\053\053\052\053\051\062"elseif seedId==5667 then emote="\060\058\108\103\114\105\100\115\058\049\050\053\054\049\054\054\052\055\052\056\055\054\052\053\050\057\048\052\062"elseif seedId==341 then emote="\060\058\099\104\097\110\100\115\058\049\050\053\054\049\054\054\055\051\049\048\054\052\050\055\057\048\052\049\062"elseif seedId==8641 then emote="\060\058\102\101\110\099\101\115\058\049\050\053\054\049\054\055\049\050\056\051\049\053\051\051\052\054\053\056\062"elseif seedId==3005 then emote="\060\058\102\116\097\110\107\115\058\049\050\053\054\049\054\055\053\048\054\056\056\048\055\053\055\055\057\048\062"else emote="\060\058\105\100\107\058\049\050\053\054\049\054\055\055\053\051\052\051\056\052\054\050\048\055\054\062"end return emote end function infoPack()local V={}for t,l in pairs(bot:getObjects())do if l.id==seedId then if V[l.id]then V[l.id].count=V[l.id].count+l.count else V[l.id]={id=l.id;count=l.count}end end end countSeed=V[seedId].count end function storeSeed(V)botInfo("\083\116\111\114\105\110\103 \083\101\101\100")sleep(100)bot:autoCollect(3,false)sleep(100)warp(seedStorage,doorSeed)sleep(100)for V,t in ipairs(bot:getTiles({skip=true}))do if t.fg==patokanSeed or t.bg==patokanSeed then if tileDrop2(t.x,t.y,100)then while math.floor((bot:getLocal()).pos.x/32)~=t.x+1 or math.floor((bot:getLocal()).pos.y/32)~=t.y do bot:findPath(t.x+1,t.y)sleep(1000)reconnect(seedStorage,doorSeed,t.x+1,t.y)end while findItem(seedId)>=100 and tileDrop2(t.x,t.y,100)do bot:sendPacket("\097\099\116\105\111\110\124\100\114\111\112\n\124\105\116\101\109\073\068\124"..seedId,2)sleep(1250)bot:sendPacket("\097\099\116\105\111\110\124\100\105\097\108\111\103\095\114\101\116\117\114\110\n\100\105\097\108\111\103\095\110\097\109\101\124\100\114\111\112\095\105\116\101\109\n\105\116\101\109\073\068\124"..(seedId.."\124\n\099\111\117\110\116\124\049\048\048"),2)sleep(1250)reconnect(seedStorage,doorSeed,t.x+1,t.y)end end if findItem(seedId)<100 then break end end end infoPack()sleep(100)warp(V,doorFarm)sleep(100)bot:autoCollect(3,true)sleep(100)botInfo("\070\097\114\109\105\110\103")sleep(100)end function buy()botInfo("\066\117\121\105\110\103 \097\110\100 \083\116\111\114\105\110\103 \080\097\099\107")sleep(100)bot:autoCollect(3,false)sleep(100)warp(packStorage,doorPack)sleep(100)while(bot:getLocal()).gems>=packPrice do for V=1,20,1 do bot:sendPacket("\097\099\116\105\111\110\124\098\117\121\n\105\116\101\109\124"..packName,2)sleep(2000)if findItem(packList[1])==0 then bot:sendPacket("\097\099\116\105\111\110\124\098\117\121\n\105\116\101\109\124\117\112\103\114\097\100\101\095\098\097\099\107\112\097\099\107",2)sleep(1500)else profit=profit+1 end if(bot:getLocal()).gems<packPrice then break end end storePack()sleep(100)reconnect(packStorage,doorPack)end botInfo("\070\097\114\109\105\110\103")sleep(100)end function includesNumber(V,t)for V,l in pairs(V)do if l==t then return true end end return false end function clear()for V,t in pairs(bot:getInventory())do if not includesNumber(goods,t.id)then bot:sendPacket("\097\099\116\105\111\110\124\116\114\097\115\104\n\124\105\116\101\109\073\068\124"..t.id,2)sleep(500)bot:sendPacket("\097\099\116\105\111\110\124\100\105\097\108\111\103\095\114\101\116\117\114\110\n\100\105\097\108\111\103\095\110\097\109\101\124\116\114\097\115\104\095\105\116\101\109\n\105\116\101\109\073\068\124"..(t.id..("\124\n\099\111\117\110\116\124"..t.count)),2)sleep(1250)end end end function collect(V,t)for l,U in pairs(bot:getObjects())do if t~=""and t~=nil then if U.id==t then local t=round(U.pos.x/32)local l=math.floor(U.pos.y/32)if bot:isInside(t,l,V)then bot:collectObject(U.uid)end end else local t=round(U.pos.x/32)local l=math.floor(U.pos.y/32)if bot:isInside(t,l,V)then bot:collectObject(U.uid)end end end end function take(V)botInfo("\084\097\107\105\110\103 \083\101\101\100")sleep(100)while findItem(seedId)==0 do bot:autoCollect(3,false)sleep(100)warp(seedStorage,doorSeed)sleep(100)for V,t in pairs(bot:getObjects())do if t.id==seedId then bot:findPath(round(t.pos.x/32),math.floor(t.pos.y/32))sleep(1000)collect(2,seedId)sleep(1000)end if findItem(seedId)>0 then break end end warp(V,doorFarm)sleep(100)bot:autoCollect(3,true)sleep(100)end end function place(V,t,l)return bot:placeTile(math.floor((bot:getLocal()).pos.x/32)+t,math.floor((bot:getLocal()).pos.y/32)+l,V)end function punch(V,t)return bot:hitTile(math.floor((bot:getLocal()).pos.x/32)+V,math.floor((bot:getLocal()).pos.y/32)+t)end function checkSeed(V)if findItem(seedId)==0 then take(V)sleep(100)botInfo("\080\108\097\110\116\105\110\103 \083\101\101\100\115")sleep(100)end end function plant(V)botInfo("\080\108\097\110\116\105\110\103 \083\101\101\100\115")sleep(100)for t,l in ipairs(bot:getTiles())do if findItem(seedId)==0 then break end if(bot:getTile(l.x,l.y)).fg==0 and(l.y~=0 and((bot:getTile(l.x,l.y+1)).fg~=0 and(not bot:isSeed(l.x,l.y+1)and(bot:hasAccessToTile(l.x,l.y)and(l.x~=0 and l.x~=99)))))then bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and(bot:hasAccessToTile(l.x,l.y)and(bot:getTile(l.x,l.y+1)).fg~=0)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y)end elseif l.y==53 then if l.x==0 and(l.y==53 and(l.fg==0 and bot:hasAccessToTile(l.x,l.y)))then bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and bot:hasAccessToTile(l.x,l.y)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y)end elseif(bot:getTile(l.x,l.y-1)).fg~=0 and((bot:getTile(l.x,l.y)).fg==0 and(bot:hasAccessToTile(l.x,l.y)and(l.x~=0 and l.x~=99)))then bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and(bot:hasAccessToTile(l.x,l.y)and(bot:getTile(l.x,l.y-1)).fg~=0)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y+1)end elseif l.x==99 and(l.y==53 and(l.fg==0 and bot:hasAccessToTile(l.x,l.y)))then bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and bot:hasAccessToTile(l.x,l.y)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y)end end end end if findItem(seedId)>=100 then storeSeed(V)sleep(100)end end function plant2(V)for t,l in ipairs(bot:getTiles())do if(bot:getTile(l.x,l.y)).fg==0 and(l.y~=0 and((bot:getTile(l.x,l.y+1)).fg~=0 and(not bot:isSeed(l.x,l.y+1)and(bot:hasAccessToTile(l.x,l.y)and(l.x~=0 and l.x~=99)))))then checkSeed(V)bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and(bot:hasAccessToTile(l.x,l.y)and(bot:getTile(l.x,l.y+1)).fg~=0)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y)end elseif l.y==53 then if l.x==0 and(l.y==53 and(l.fg==0 and bot:hasAccessToTile(l.x,l.y)))then checkSeed(V)bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and bot:hasAccessToTile(l.x,l.y)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y)end elseif(bot:getTile(l.x,l.y-1)).fg~=0 and((bot:getTile(l.x,l.y)).fg==0 and(bot:hasAccessToTile(l.x,l.y)and(l.x~=0 and l.x~=99)))then checkSeed(V)bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and(bot:hasAccessToTile(l.x,l.y)and(bot:getTile(l.x,l.y-1)).fg~=0)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y+1)end elseif l.x==99 and(l.y==53 and(l.fg==0 and bot:hasAccessToTile(l.x,l.y)))then checkSeed(V)bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and bot:hasAccessToTile(l.x,l.y)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y)end end end end if findItem(seedId)>=100 then storeSeed(V)sleep(100)end end function plant3(V)for t,l in ipairs(bot:getTiles())do if findItem(seedId)==0 then countWorld(V)sleep(100)if scanBlock()>0 then pnb2(V)sleep(100)else take(V)sleep(100)botInfo("\080\108\097\110\116\105\110\103 \083\101\101\100\115")sleep(100)end end if(bot:getTile(l.x,l.y)).fg==0 and(l.y~=0 and((bot:getTile(l.x,l.y+1)).fg~=0 and(not bot:isSeed(l.x,l.y+1)and(bot:hasAccessToTile(l.x,l.y)and(l.x~=0 and l.x~=99)))))then bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and(bot:hasAccessToTile(l.x,l.y)and(bot:getTile(l.x,l.y+1)).fg~=0)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y)end elseif l.y==53 then if l.x==0 and(l.y==53 and(l.fg==0 and bot:hasAccessToTile(l.x,l.y)))then bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and bot:hasAccessToTile(l.x,l.y)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y)end elseif(bot:getTile(l.x,l.y-1)).fg~=0 and((bot:getTile(l.x,l.y)).fg==0 and(bot:hasAccessToTile(l.x,l.y)and(l.x~=0 and l.x~=99)))then bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and(bot:hasAccessToTile(l.x,l.y)and(bot:getTile(l.x,l.y-1)).fg~=0)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y+1)end elseif l.x==99 and(l.y==53 and(l.fg==0 and bot:hasAccessToTile(l.x,l.y)))then bot:findPath(l.x,l.y)sleep(50)while(bot:getTile(l.x,l.y)).fg==0 and bot:hasAccessToTile(l.x,l.y)do place(seedId,0,0)sleep(delayPlant)reconnect(V,doorFarm,l.x,l.y)end end end end if findItem(seedId)>=100 then storeSeed(V)sleep(100)end end function pnb(V)if findItem(blockId)>=tileNumber then botInfo("\066\114\101\097\107\105\110\103 \066\108\111\099\107\115")if not customPNB then ex=1 ye=math.floor((bot:getLocal()).pos.y/32)if ye>40 then ye=ye-10 elseif ye<11 then ye=ye+10 end if(bot:getTile(ex,ye)).fg~=0 and(bot:getTile(ex,ye)).fg~=seedId then ye=ye-1 end else ex=customX ye=customY end while math.floor((bot:getLocal()).pos.x/32)~=ex or math.floor((bot:getLocal()).pos.y/32)~=ye do bot:findPath(ex,ye)sleep(1500)end if tileNumber>1 then while findItem(blockId)>=tileNumber and findItem(seedId)<190 do while tilePlace(ex,ye)do for t,l in pairs(tileBreak)do if(bot:getTile(ex-1,ye+l)).fg==0 and(bot:getTile(ex-1,ye+l)).bg==0 then place(blockId,-1,l)sleep(delayPlace)reconnect(V,doorFarm,ex,ye)end end end while tilePunch(ex,ye)do for t,l in pairs(tileBreak)do if(bot:getTile(ex-1,ye+l)).fg~=0 or(bot:getTile(ex-1,ye+l)).bg~=0 then punch(-1,l)sleep(delayPunch)reconnect(V,doorFarm,ex,ye)end end end reconnect(V,doorFarm,ex,ye)end else while findItem(blockId)>0 and findItem(seedId)<190 do while(bot:getTile(ex-1,ye)).fg==0 and(bot:getTile(ex-1,ye)).bg==0 do place(blockId,-1,0)sleep(delayPlace)reconnect(V,doorFarm,ex,ye)end while(bot:getTile(ex-1,ye)).fg~=0 or(bot:getTile(ex-1,ye)).bg~=0 do punch(-1,0)sleep(delayPunch)reconnect(V,doorFarm,ex,ye)end end end clear()sleep(100)if(bot:getLocal()).gems>=minimumGem then buy()sleep(100)warp(V,doorFarm)sleep(100)bot:autoCollect(3,true)sleep(100)botInfo("\070\097\114\109\105\110\103")sleep(100)end end end function scanBlock()local V={}for t,l in pairs(bot:getObjects())do if l.id==blockId then if V[l.id]then V[l.id].count=V[l.id].count+l.count else V[l.id]={id=l.id,count=l.count}end end end if V[blockId]then return V[blockId].count else return 0 end end function takeBlock(V)for t,l in pairs(bot:getObjects())do if l.id==blockId and#bot:getPath(round(l.pos.x/32),math.floor(l.pos.y/32))>0 then bot:findPath(round(l.pos.x/32),math.floor(l.pos.y/32))sleep(500)collect(2)sleep(1000)reconnect(V,doorFarm,round(l.pos.x/32),math.floor(l.pos.y/32))end if findItem(blockId)>=190 then break end end end function pnb2(V)if findItem(blockId)<tileNumber then takeBlock(V)sleep(100)end if findItem(blockId)>=tileNumber then botInfo("\066\114\101\097\107\105\110\103 \066\108\111\099\107\115")sleep(100)if not customPNB then ex=1 ye=math.floor((bot:getLocal()).pos.y/32)if ye>40 then ye=ye-10 elseif ye<11 then ye=ye+10 end if(bot:getTile(ex,ye)).fg~=0 and(bot:getTile(ex,ye)).fg~=seedId then ye=ye-1 end else ex=customX ye=customY end while math.floor((bot:getLocal()).pos.x/32)~=ex or math.floor((bot:getLocal()).pos.y/32)~=ye do bot:findPath(ex,ye)sleep(1500)end if tileNumber>1 then while findItem(blockId)>=tileNumber and findItem(seedId)<190 do while tilePlace(ex,ye)do for t,l in pairs(tileBreak)do if(bot:getTile(ex-1,ye+l)).fg==0 and(bot:getTile(ex-1,ye+l)).bg==0 then place(blockId,-1,l)sleep(delayPlace)reconnect(V,doorFarm,ex,ye)end end end while tilePunch(ex,ye)do for t,l in pairs(tileBreak)do if(bot:getTile(ex-1,ye+l)).fg~=0 or(bot:getTile(ex-1,ye+l)).bg~=0 then punch(-1,l)sleep(delayPunch)reconnect(V,doorFarm,ex,ye)end end end reconnect(V,doorFarm,ex,ye)end else while findItem(blockId)>0 and findItem(seedId)<190 do while(bot:getTile(ex-1,ye)).fg==0 and(bot:getTile(ex-1,ye)).bg==0 do place(blockId,-1,0)sleep(delayPlace)reconnect(V,doorFarm,ex,ye)end while(bot:getTile(ex-1,ye)).fg~=0 or(bot:getTile(ex-1,ye)).bg~=0 do punch(-1,0)sleep(delayPunch)reconnect(V,doorFarm,ex,ye)end end end clear()sleep(100)if(bot:getLocal()).gems>=minimumGem then buy()sleep(100)warp(V,doorFarm)sleep(100)bot:autoCollect(3,true)sleep(100)botInfo("\070\097\114\109\105\110\103")sleep(100)end end end function harvest(V)botInfo("\072\097\114\118\101\115\116\105\110\103 \084\114\101\101\115")sleep(100)countWorld(V)sleep(100)for t,l in ipairs(bot:getTiles({skip=true}))do if l.fg==seedId then if bot:canHarvest(l.x,l.y)and bot:hasAccessToTile(l.x,l.y)then bot:findPath(l.x,l.y)sleep(100)while(bot:getTile(l.x,l.y)).fg==seedId and(bot:canHarvest(l.x,l.y)and bot:hasAccessToTile(l.x,l.y))do punch(0,0)sleep(delayHarvest)reconnect(V,doorFarm,l.x,l.y)end end end if findItem(blockId)>=190 or findItem(seedId)>=190 then pnb(V)sleep(100)plant(V)sleep(100)end end pnb(V)sleep(100)plant2(V)sleep(100)if(bot:getLocal()).gems>=minimumGem then buy()sleep(100)end end function collect2(V)for t,l in pairs(bot:getObjects())do local U=round(l.pos.x/32)local B=math.floor(l.pos.y/32)if l.count<190 then if bot:isInside(U,B,V)then bot:collectObject(l.uid)end end end end function harvest2(V)botInfo("\072\097\114\118\101\115\116\105\110\103 \084\114\101\101\115")sleep(100)countWorld(V)sleep(100)for t,l in ipairs(bot:getTiles({skip=true}))do if l.fg==seedId then if bot:canHarvest(l.x,l.y)and bot:hasAccessToTile(l.x,l.y)then bot:findPath(l.x,l.y)sleep(100)bot:autoCollect(2,false)while(bot:getTile(l.x,l.y)).fg==seedId and(bot:canHarvest(l.x,l.y)and bot:hasAccessToTile(l.x,l.y))do punch(0,0)sleep(delayHarvest)collect2(3)reconnect(V,doorFarm,l.x,l.y)end end if findItem(blockId)>=190 then while findItem(blockId)>=190 and tileDrop1(l.x+1,l.y,findItem(blockId))do bot:sendPacket("\097\099\116\105\111\110\124\100\114\111\112\n\124\105\116\101\109\073\068\124"..blockId,2)sleep(1250)bot:sendPacket("\097\099\116\105\111\110\124\100\105\097\108\111\103\095\114\101\116\117\114\110\n\100\105\097\108\111\103\095\110\097\109\101\124\100\114\111\112\095\105\116\101\109\n\105\116\101\109\073\068\124"..(blockId..("\124\n\099\111\117\110\116\124"..findItem(blockId))),2)sleep(1250)reconnect(V,doorFarm,l.x,l.y)end end end if findItem(seedId)>=190 then storeSeed(V)sleep(100)end if(bot:getLocal()).level>=minimumLevel then bot:autoCollect(3,true)sleep(100)break end end if(bot:getLocal()).gems>=minimumGem then buy()sleep(100)end end function wear(V)pkt={}pkt.type=10 pkt.int_data=V bot:sendPacketRaw(pkt)end function takePickaxe()if autoPickaxe then warp(pickStorage,doorPick)sleep(100)bot:autoCollect(3,false)sleep(100)for V,t in pairs(bot:getObjects())do if t.id==98 then bot:findPath(round(t.pos.x/32)-1,math.floor(t.pos.y/32))sleep(1000)collect(2,98)sleep(1000)reconnect(pickStorage,doorPick)end if findItem(98)>1 then while findItem(98)>1 and tileDrop1(round(t.pos.x/32),math.floor(t.pos.y/32),findItem(98)-1)do bot:sendPacket("\097\099\116\105\111\110\124\100\114\111\112\n\124\105\116\101\109\073\068\124\057\056",2)sleep(1250)bot:sendPacket("\097\099\116\105\111\110\124\100\105\097\108\111\103\095\114\101\116\117\114\110\n\100\105\097\108\111\103\095\110\097\109\101\124\100\114\111\112\095\105\116\101\109\n\105\116\101\109\073\068\124\057\056\124\n\099\111\117\110\116\124"..findItem(98)-1,2)sleep(1250)reconnect(pickStorage,doorPick)end end if findItem(98)==1 then break end end wear(98)sleep(2000)end end takePickaxe()while true do leveledUp=false for V,t in pairs(worlds)do sleep(100)warp(t,doorFarm)sleep(100)bot:autoCollect(3,true)sleep(100)bl(t)sleep(100)countWorld(t)sleep(100)botInfo("\083\116\097\114\116\105\110\103 "..t)sleep(100)tt=os.time()local l=scanBlock()>0 local U=(bot:getLocal()).level>=minimumLevel if l and U then plant3(t)sleep(100)while scanBlock()>0 do pnb2(t)sleep(100)if findItem(seedId)>=100 then storeSeed(t)sleep(100)end end elseif not l and U then harvest(t)sleep(100)elseif not U then harvest2(t)sleep(100)if U then leveledUp=true break end end tt=os.time()-tt botInfo("\070\105\110\105\115\104\101\100 "..t)sleep(100)if start<stop then start=start+1 else if restartTimer then waktu={}tree={}end start=1 end end if not looping and not leveledUp then botInfo("\070\105\110\105\115\104\101\100 \065\108\108 \087\111\114\108\100\044 \082\101\109\111\118\105\110\103 \066\111\116\033")sleep(100)bot:remove()break end end
+bot = getBot()
+worlds = {}
+fossil = {}
+tileBreak = {}
+tree = {}
+treeun = {}
+profit = 0
+t = os.time()
+countSeed = 0
+blacklistTile = false
+rangeFarming = false
+
+worldList = Bot[bot:getLocal().name:upper()].farmList
+start = Bot[bot:getLocal().name:upper()].startFrom
+if Bot[bot:getLocal().name:upper()].stopAt > 0 then
+    stop = Bot[bot:getLocal().name:upper()].stopAt
+else
+    stop = #Bot[bot:getLocal().name:upper()].farmList
+end
+doorFarm = Bot[bot:getLocal().name:upper()].doorFarm
+
+tileNumber = Bot[bot:getLocal().name:upper()].tileNumber
+customPNB = Bot[bot:getLocal().name:upper()].customPNB
+customX = Bot[bot:getLocal().name:upper()].customX
+customY = Bot[bot:getLocal().name:upper()].customY
+
+autoPickaxe = Bot[bot:getLocal().name:upper()].autoPickaxe
+pickStorage = Bot[bot:getLocal().name:upper()].pickStorage
+doorPick = Bot[bot:getLocal().name:upper()].doorPick
+
+messageId = Bot[bot:getLocal().name:upper()].messageId
+
+for i = start,stop do
+    table.insert(worlds,worldList[i])
+end
+
+if Bot[bot:getLocal().name:upper()].stopAt > 0 and looping then
+    looping = false
+    rangeFarming = true
+end
+
+if looping then
+    for i = 0,start - 1 do
+        table.insert(worlds,worldList[i])
+    end
+end
+
+for _,pack in pairs(packList) do
+    table.insert(goods,pack)
+end
+
+for i = math.floor(tileNumber/2),1,-1 do
+    i = i * -1
+    table.insert(tileBreak,i)
+end
+for i = 0, math.ceil(tileNumber/2) - 1 do
+    table.insert(tileBreak,i)
+end
+
+function bl(world)
+    blist = {}
+    fossil[world:upper()] = 0
+    for _,tile in ipairs(bot:getTiles()) do
+        if tile.fg == 6 then
+            doorX = tile.x
+            doorY = tile.y
+        elseif tile.fg == 3918 then
+            fossil[world:upper()] = fossil[world:upper()] + 1
+        end
+    end
+    if blacklistTile then
+        for _,tile in pairs(blacklist) do
+            table.insert(blist,{x = doorX + tile.x, y = doorY + tile.y})
+        end
+    end
+end
+
+function tilePunch(x,y)
+    for _,num in pairs(tileBreak) do
+        if bot:getTile(x - 1,y + num).fg ~= 0 or bot:getTile(x - 1,y + num).bg ~= 0 then
+            return true
+        end
+    end
+    return false
+end
+
+function tilePlace(x,y)
+    for _,num in pairs(tileBreak) do
+        if bot:getTile(x - 1,y + num).fg == 0 and bot:getTile(x - 1,y + num).bg == 0 then
+            return true
+        end
+    end
+    return false
+end
+
+function warp(world,id)
+    while bot:getWorld().name:upper() ~= world:upper() do
+        bot:sendPacket("action|join_request\nname|"..world:upper().."\ninvitedWorld|0", 3)
+        sleep(delayJoinWorld)
+        reconnect(world, id)
+    end
+    if id ~= "" and id ~= nil then
+        while bot:getTile(math.floor(bot:getLocal().pos.x / 32), math.floor(bot:getLocal().pos.y / 32)).fg == 6 do
+            bot:sendPacket("action|join_request\nname|"..world:upper().."|"..id:upper().."\ninvitedWorld|0", 3)
+            sleep(delayJoinWorld)
+            reconnect(world, id)
+        end
+    end
+end
+
+function countWorld(world)
+    tree[world:upper()] = 0
+    treeun[world:upper()] = 0
+    if bot:inWorld() then
+        for _,tile in ipairs(bot:getTiles()) do
+            if tile.fg == seedId and bot:hasAccessToTile(tile.x,tile.y) then
+                if bot:canHarvest(tile.x,tile.y) then
+                    tree[world:upper()] = tree[world:upper()] + 1
+                else
+                    treeun[world:upper()] = treeun[world:upper()] + 1
+                end
+            end
+        end
+    end
+end
+
+function botInfo(info)
+    te = os.time() - t
+    fossill = (fossil[bot:getWorld().name:upper()] or 0)
+    local text = [[
+    {
+        "content": null,
+        "embeds": [
+        {
+            "title": "Rotation Script By Omniscius",
+            "color": 16377020,
+            "fields": [
+            {
+                "name": "TASK INFORMATION",
+                "value": "<:dubstep:1256121477242290247> | Current Task : ]]..info..[[\n<:crystalclock:1256120386081390604> | Uptime : ]]..math.floor(te/86400)..[[ Days ]]..math.floor(te%86400/3600)..[[ Hours ]]..math.floor(te%86400%3600/60)..[[ Minutes"
+            },
+            {
+                "name": "BOT INFORMATION",
+                "value": "<:7577nametag:1256116827269103716> | Bot Name : ||]]..bot:getLocal().name:upper()..[[||\n<:experience:1256141908070371429> | Bot Level : ]]..bot:getLocal().level..[[\n<:traine:1256142604266115092> | Bot Status : ]]..statusBot()..[[ (]]..bot:getMs()..[[)\n<:gems:1256142860265459786> | Bot Gems : ]]..bot:getLocal().gems..[["
+            },
+            {
+                "name": "WORLD INFORMATION",
+                "value": "<:checkmark:1256141379185278988> | World Order : ]]..start..[[ / ]]..stop..[[\n<:globe:1256140993888256091> | Current World : ||]]..bot:getWorld().name:upper()..[[||\n<:fossil:1256139849707294760> | Fossil : ]]..fossill..[[\n<:ready:1256139261367947294> | Tree Ready : ]]..(tree[bot:getWorld().name:upper()] or "?")..[[\n<:unready:1256138410389671966> | Tree Unready : ]]..(treeun[bot:getWorld().name:upper()] or "?")..[["
+            },
+            {
+                "name": "STORAGE INFORMATION",
+                "value": "<:vault:1256130550230548631> | Profit Pack : ]]..profit..[[ ]]..packName..[[\n]]..itemInfo()..[[ | Total Seed : ]]..countSeed..[["
+            },
+            {
+                "name": "ABOUT SCRIPT",
+                "value": "<:41564crownorange:1256129724980265031>| Script Owner : <@]]..discordUserId..[[>\n<:disc:1256128692975960137> | Discord Server : https://discord.gg/XGzEaRVHTk"
+            }
+            ],
+            "footer": {
+            "text": "]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[["
+            }
+        }
+        ],
+        "username": "Omniscius Script",
+        "attachments": []
+    }]]
+
+    if webhookEdited then
+        local requestInfo = {
+            url = webhookMain.."/messages/"..messageId,
+            method = PATCH,
+            json = true,
+            postData = text
+        }
+        httpReq(requestInfo)
+    else
+        local requestInfo = {
+            url = webhookMain,
+            method = POST,
+            json = true,
+            postData = text
+        }
+        httpReq(requestInfo)
+    end
+end
+
+function reconInfo()
+    local text = [[
+        {
+        "content": "||]]..bot:getLocal().name..[[|| status is ]]..statusBot()..[[ @everyone",
+        "embeds": null,
+        "username": "Omniscius Script",
+        "attachments": []
+    }
+    ]]
+
+    local requestInfo = {
+        url = webhookStatus,
+        method = POST,
+        json = true,
+        postData = text
+    }
+    httpReq(requestInfo)
+end
+
+function statusBot()
+    bot = getBot()
+    if bot:getEnetStatus() == Connected and bot:getBotStatus() == Success then
+        Status = "online"
+    elseif bot:getBotStatus() == Suspended then
+        Status = "suspended"
+    elseif bot:getBotStatus() == Banned then
+        Status = "banned"
+    elseif bot:getBotStatus() == Wrong_Password then
+        Status = "wrong"
+    elseif bot:getBotStatus() == Update_Required then
+        Status = "update version"
+    elseif bot:getBotStatus() == Maintenance then
+        Status = "maintenance"
+    elseif bot:getBotStatus() == AAP then
+        Status = "AAP"
+    elseif bot:getBotStatus() == Unable_to_create_new_account then
+        Status = "guestError"
+    else
+        Status = "offline"
+    end
+    return Status
+end
+
+function reconnect(world,id,x,y)
+    if statusBot() ~= "online" then
+        botInfo("Reconnecting")
+        sleep(100)
+        reconInfo()
+        sleep(100)
+        konek = 0
+        while true do
+            bot:reConnect()
+            bot:setBool("autoReconnect", false)
+            sleep(15000)
+            if statusBot() == "suspended" or statusBot() == "banned" then
+                botInfo(statusBot())
+                sleep(100)
+                reconInfo()
+                sleep(100)
+                while true do
+                    sleep(10000)
+                end
+            elseif statusBot() == "maintenance" then
+                botInfo(statusBot())
+                sleep(60000)
+            end
+            while statusBot() == "online" and bot:getWorld().name:upper() ~= world:upper() do
+                bot:sendPacket("action|join_request\nname|"..world:upper().."\ninvitedWorld|0",3)
+                sleep(delayJoinWorld)
+            end
+            if statusBot() == "online" and bot:getWorld().name:upper() == world:upper() then
+                if id then
+                    while bot:getTile(math.floor(bot:getLocal().pos.x/32), math.floor(bot:getLocal().pos.y/32)).fg == 6 do
+                        bot:sendPacket("action|join_request\nname|"..world:upper().."|"..id:upper().."\ninvitedWorld|0",3)
+                        sleep(delayJoinWorld)
+                    end
+                end
+                if x and y and statusBot() == "online" and bot:getWorld().name:upper() == world:upper() then
+                    while math.floor(bot:getLocal().pos.x/32) ~= x or math.floor(bot:getLocal().pos.y/32) ~= y do
+                        if not bot:isInside(x,y,0) and #bot:getPath(x,y) > 0 then
+                            bot:findPath(x,y)
+                            sleep(200)
+                        end
+                    end
+                end
+                if statusBot() == "online" and bot:getWorld().name:upper() == world:upper() then
+                    if x and y then
+                        if statusBot() == "online" and math.floor(bot:getLocal().pos.x/32) == x and math.floor(bot:getLocal().pos.y/32) == y then
+                            break
+                        end
+                    elseif statusBot() == "online" then
+                        break
+                    end
+                end
+            end
+            if konek < 20 then
+                konek = konek + 1
+            else
+                local minutes = math.floor(600000 / 60000)
+                botInfo("Max Reconnect Attempt Reached! Waiting for "..minutes.." Minutes")
+                sleep(600000)
+                konek = 0
+                botInfo("Reconnecting")
+                sleep(100)
+            end
+        end
+        botInfo("Succesfully Reconnected")
+        sleep(100)
+        reconInfo()
+        sleep(100)
+        botInfo("Farming")
+        sleep(100)
+    end
+end
+
+function findItem(id)
+    return bot:getItemCount(id)
+end
+
+function round(n)
+    return n % 1 > 0.5 and math.ceil(n) or math.floor(n)
+end
+
+function tileDrop1(x,y,num)
+    local count = 0
+    local stack = 0
+    for _,obj in pairs(bot:getObjects()) do
+        if round(obj.pos.x / 32) == x and math.floor(obj.pos.y / 32) == y then
+            count = count + obj.count
+            stack = stack + 1
+        end
+    end
+    if stack < 20 and count <= (4000 - num) then
+        return true
+    end
+    return false
+end
+
+function tileDrop2(x,y,num)
+    local count = 0
+    local stack = 0
+    for _,obj in pairs(bot:getObjects()) do
+        if round(obj.pos.x / 32) == x and math.floor(obj.pos.y / 32) == y then
+            count = count + obj.count
+            stack = stack + 1
+        end
+    end
+    if count <= (4000 - num) then
+        return true
+    end
+    return false
+end
+
+function storePack()
+    for _,pack in pairs(packList) do
+        for _,tile in ipairs(bot:getTiles()) do
+            if tile.fg == patokanPack or tile.bg == patokanPack then
+                if tileDrop1(tile.x,tile.y,findItem(pack)) then
+                    while math.floor(bot:getLocal().pos.x / 32) ~= (tile.x + 1) or math.floor(bot:getLocal().pos.y / 32) ~= tile.y do
+                        bot:findPath(tile.x + 1,tile.y)
+                        sleep(1000)
+                        reconnect(packStorage,doorPack,tile.x + 1,tile.y)
+                    end
+                    faceSide("left")
+                    sleep(500)
+                    while findItem(pack) > 0 and tileDrop1(tile.x,tile.y,findItem(pack)) do
+                        bot:sendPacket("action|drop\n|itemID|"..pack, 2)
+                        sleep(1250)
+                        bot:sendPacket("action|dialog_return\ndialog_name|drop_item\nitemID|"..pack.."|\ncount|"..findItem(pack), 2)
+                        sleep(1250)
+                        reconnect(packStorage,doorPack,tile.x - 1,tile.y)
+                    end
+                end
+            end
+            if findItem(pack) == 0 then
+                break
+            end
+        end
+    end
+end
+
+function itemInfo()
+    if seedId == 4585 then
+        emote = "<:peppers:1256136913111355453>"
+    elseif seedId == 5667 then
+        emote = "<:lgrids:1256166474876452904>"
+    elseif seedId == 341 then
+        emote = "<:chands:1256166731064279041>"
+    elseif seedId == 8641 then
+        emote = "<:fences:1256167128315334658>"
+    elseif seedId == 3005 then
+        emote = "<:ftanks:1256167506880757790>"
+    else
+        emote = "<:idk:1256167753438462076>"
+    end
+
+    return emote
+end
+
+function infoPack()
+    local store = {}
+    for _,obj in pairs(bot:getObjects()) do
+        if obj.id == seedId then
+            if store[obj.id] then
+                store[obj.id].count = store[obj.id].count + obj.count
+            else
+                store[obj.id] = {id = obj.id, count = obj.count}
+            end
+        end
+    end
+    countSeed = store[seedId].count
+end
+
+function faceSide(direction)
+    local packet = {}
+    packet.type = 0
+    if direction == "left" then
+        packet.flags = 48
+    elseif direction == "right" then
+        packet.flags = 32
+    end
+    packet.pos_x = bot:getLocal().pos.x
+    packet.pos_y = bot:getLocal().pos.y
+    bot:sendPacketRaw(packet)
+end
+
+function storeSeed(world)
+    botInfo("Storing Seed")
+    sleep(100)
+    bot:autoCollect(3, false)
+    sleep(100)
+    warp(seedStorage,doorSeed)
+    sleep(100)
+    for _,tile in ipairs(bot:getTiles()) do
+        if tile.fg == patokanSeed or tile.bg == patokanSeed then
+            if tileDrop2(tile.x,tile.y,100) then
+                while math.floor(bot:getLocal().pos.x / 32) ~= (tile.x + 1) or math.floor(bot:getLocal().pos.y / 32) ~= tile.y do
+                    bot:findPath(tile.x + 1,tile.y)
+                    sleep(1000)
+                    reconnect(seedStorage,doorSeed,tile.x + 1,tile.y)
+                end
+                faceSide("left")
+                sleep(500)
+                while findItem(seedId) >= 100 and tileDrop2(tile.x,tile.y,100) do
+                    bot:sendPacket("action|drop\n|itemID|"..seedId, 2)
+                    sleep(1250)
+                    bot:sendPacket("action|dialog_return\ndialog_name|drop_item\nitemID|"..seedId.."|\ncount|100", 2)
+                    sleep(1250)
+                    reconnect(seedStorage,doorSeed,tile.x + 1,tile.y)
+                end
+            end
+            if findItem(seedId) < 100 then
+                break
+            end
+        end
+    end
+    infoPack()
+    sleep(100)
+    warp(world,doorFarm)
+    sleep(100)
+    bot:autoCollect(3, true)
+    sleep(100)
+    botInfo("Farming")
+    sleep(100)
+end
+
+function buy()
+    botInfo("Buying and Storing Pack")
+    sleep(100)
+    bot:autoCollect(3, false)
+    sleep(100)
+    warp(packStorage,doorPack)
+    sleep(100)
+    while bot:getLocal().gems >= packPrice do
+        for i = 1, packLimit do
+            bot:sendPacket("action|buy\nitem|"..debugPack, 2)
+            sleep(2000)
+            if findItem(packList[1]) == 0 then
+                bot:sendPacket("action|buy\nitem|upgrade_backpack", 2)
+                sleep(2000)
+            else
+                profit = profit + 1
+            end
+            if bot:getLocal().gems < packPrice then
+                break
+            end
+        end
+        storePack()
+        sleep(100)
+        reconnect(packStorage,doorPack)
+    end
+    botInfo("Farming")
+    sleep(100)
+end
+
+function includesNumber(table, number)
+    for _,num in pairs(table) do
+        if num == number then
+            return true
+        end
+    end
+    return false
+end
+
+function clear()
+    for _,item in pairs(bot:getInventory()) do
+        if not includesNumber(goods, item.id) then
+            bot:sendPacket("action|trash\n|itemID|"..item.id, 2)
+            sleep(500)
+            bot:sendPacket("action|dialog_return\ndialog_name|trash_item\nitemID|"..item.id.."|\ncount|"..item.count, 2)
+            sleep(1250)
+        end
+    end
+end
+
+function collect(range,id)
+    for i,obj in pairs(bot:getObjects()) do
+        if id ~= "" and id ~= nil then
+            if obj.id == id then
+                local ex = round(obj.pos.x/32)
+                local ye = math.floor(obj.pos.y/32)
+                if bot:isInside(ex, ye, range) then
+                    bot:collectObject(obj.uid)
+                end
+            end
+        else
+            local ex = round(obj.pos.x/32)
+            local ye = math.floor(obj.pos.y/32)
+            if bot:isInside(ex, ye, range) then
+                bot:collectObject(obj.uid)
+            end
+        end
+    end
+end
+
+function take(world)
+    botInfo("Taking Seed")
+    sleep(100)
+    while findItem(seedId) == 0 do
+        bot:autoCollect(3, false)
+        sleep(100)
+        warp(seedStorage,doorSeed)
+        sleep(100)
+        for _,obj in pairs(bot:getObjects()) do
+            if obj.id == seedId then
+                bot:findPath(round(obj.pos.x / 32),math.floor(obj.pos.y / 32))
+                sleep(1000)
+                collect(2, seedId)
+                sleep(1000)
+            end
+            if findItem(seedId) > 0 then
+                break
+            end
+        end
+        warp(world,doorFarm)
+        sleep(100)
+        bot:autoCollect(3, true)
+        sleep(100)
+    end
+end
+
+function place(item,x,y)
+    return bot:placeTile(math.floor(bot:getLocal().pos.x/32)+x, math.floor(bot:getLocal().pos.y/32)+y, item)
+end
+
+function punch(x,y)
+    return bot:hitTile(math.floor(bot:getLocal().pos.x/32)+x, math.floor(bot:getLocal().pos.y/32)+y)
+end
+
+function checkSeed(world)
+    if findItem(seedId) == 0 then
+        take(world)
+        sleep(100)
+        botInfo("Planting Seeds")
+        sleep(100)
+    end
+end
+
+function plant(world)
+    botInfo("Planting Seeds")
+    sleep(100)
+    countWorld(world)
+    sleep(100)
+    for _,tile in ipairs(bot:getTiles()) do
+        if findItem(seedId) == 0 then
+            break
+        end
+        if bot:getTile(tile.x,tile.y).fg == 0 and tile.y ~= 0 and bot:getTile(tile.x,tile.y + 1).fg ~= 0 and not bot:isSeed(tile.x,tile.y+1) and bot:hasAccessToTile(tile.x,tile.y) and tile.x ~= 0 and tile.x ~= 99 then
+            bot:findPath(tile.x,tile.y)
+            sleep(50)
+            while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) and bot:getTile(tile.x,tile.y+1).fg ~= 0  do
+                place(seedId,0,0)
+                sleep(delayPlant)
+                reconnect(world,doorFarm,tile.x,tile.y)
+            end
+        elseif tile.y == 53 then
+            if tile.x == 0 and tile.y == 53 and tile.fg == 0 and bot:hasAccessToTile(tile.x,tile.y) then
+                bot:findPath(tile.x,tile.y)
+                sleep(50)
+                while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) do
+                    place(seedId,0,0)
+                    sleep(delayPlant)
+                    reconnect(world,doorFarm,tile.x,tile.y)
+                end
+            elseif bot:getTile(tile.x, tile.y-1).fg ~= 0 and bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) and tile.x ~= 0 and tile.x ~= 99 then
+                bot:findPath(tile.x,tile.y)
+                sleep(50)
+                while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) and bot:getTile(tile.x,tile.y-1).fg ~= 0  do
+                    place(seedId,0,0)
+                    sleep(delayPlant)
+                    reconnect(world,doorFarm,tile.x,tile.y + 1)
+                end
+            elseif tile.x == 99 and tile.y == 53 and tile.fg == 0 and bot:hasAccessToTile(tile.x,tile.y) then
+                bot:findPath(tile.x,tile.y)
+                sleep(50)
+                while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) do
+                    place(seedId,0,0)
+                    sleep(delayPlant)
+                    reconnect(world,doorFarm,tile.x,tile.y)
+                end
+            end
+        end
+    end
+    countWorld(world)
+    sleep(100)
+    if findItem(seedId) >= 100 then
+        storeSeed(world)
+        sleep(100)
+    end
+end
+
+function plant2(world)
+    botInfo("Planting Seeds")
+    sleep(100)
+    countWorld(world)
+    sleep(100)
+    for _,tile in ipairs(bot:getTiles()) do
+        if bot:getTile(tile.x,tile.y).fg == 0 and tile.y ~= 0 and bot:getTile(tile.x,tile.y + 1).fg ~= 0 and not bot:isSeed(tile.x,tile.y+1) and bot:hasAccessToTile(tile.x,tile.y) and tile.x ~= 0 and tile.x ~= 99 then
+            checkSeed(world)
+            bot:findPath(tile.x,tile.y)
+            sleep(50)
+            while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) and bot:getTile(tile.x,tile.y+1).fg ~= 0  do
+                place(seedId,0,0)
+                sleep(delayPlant)
+                reconnect(world,doorFarm,tile.x,tile.y)
+            end
+        elseif tile.y == 53 then
+            if tile.x == 0 and tile.y == 53 and tile.fg == 0 and bot:hasAccessToTile(tile.x,tile.y) then
+                checkSeed(world)
+                bot:findPath(tile.x,tile.y)
+                sleep(50)
+                while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) do
+                    place(seedId,0,0)
+                    sleep(delayPlant)
+                    reconnect(world,doorFarm,tile.x,tile.y)
+                end
+            elseif bot:getTile(tile.x, tile.y-1).fg ~= 0 and bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) and tile.x ~= 0 and tile.x ~= 99 then
+                checkSeed(world)
+                bot:findPath(tile.x,tile.y)
+                sleep(50)
+                while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) and bot:getTile(tile.x,tile.y-1).fg ~= 0  do
+                    place(seedId,0,0)
+                    sleep(delayPlant)
+                    reconnect(world,doorFarm,tile.x,tile.y + 1)
+                end
+            elseif tile.x == 99 and tile.y == 53 and tile.fg == 0 and bot:hasAccessToTile(tile.x,tile.y) then
+                checkSeed(world)
+                bot:findPath(tile.x,tile.y)
+                sleep(50)
+                while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) do
+                    place(seedId,0,0)
+                    sleep(delayPlant)
+                    reconnect(world,doorFarm,tile.x,tile.y)
+                end
+            end
+        end
+    end
+    countWorld(world)
+    sleep(100)
+    if findItem(seedId) >= 100 then
+        storeSeed(world)
+        sleep(100)
+    end
+end
+
+function plant3(world)
+    botInfo("Planting Seeds")
+    sleep(100)
+    countWorld(world)
+    sleep(100)
+    for _,tile in ipairs(bot:getTiles()) do
+        if findItem(seedId) == 0 then
+            countWorld(world)
+            sleep(100)
+            if scanBlock() > 0 then
+                pnb2(world)
+                sleep(100)
+            else
+                take(world)
+                sleep(100)
+                botInfo("Planting Seeds")
+                sleep(100)
+            end
+        end
+        if bot:getTile(tile.x,tile.y).fg == 0 and tile.y ~= 0 and bot:getTile(tile.x,tile.y + 1).fg ~= 0 and not bot:isSeed(tile.x,tile.y+1) and bot:hasAccessToTile(tile.x,tile.y) and tile.x ~= 0 and tile.x ~= 99 then
+            bot:findPath(tile.x,tile.y)
+            sleep(50)
+            while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) and bot:getTile(tile.x,tile.y+1).fg ~= 0  do
+                place(seedId,0,0)
+                sleep(delayPlant)
+                reconnect(world,doorFarm,tile.x,tile.y)
+            end
+        elseif tile.y == 53 then
+            if tile.x == 0 and tile.y == 53 and tile.fg == 0 and bot:hasAccessToTile(tile.x,tile.y) then
+                bot:findPath(tile.x,tile.y)
+                sleep(50)
+                while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) do
+                    place(seedId,0,0)
+                    sleep(delayPlant)
+                    reconnect(world,doorFarm,tile.x,tile.y)
+                end
+            elseif bot:getTile(tile.x, tile.y-1).fg ~= 0 and bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) and tile.x ~= 0 and tile.x ~= 99 then
+                bot:findPath(tile.x,tile.y)
+                sleep(50)
+                while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) and bot:getTile(tile.x,tile.y-1).fg ~= 0  do
+                    place(seedId,0,0)
+                    sleep(delayPlant)
+                    reconnect(world,doorFarm,tile.x,tile.y + 1)
+                end
+            elseif tile.x == 99 and tile.y == 53 and tile.fg == 0 and bot:hasAccessToTile(tile.x,tile.y) then
+                bot:findPath(tile.x,tile.y)
+                sleep(50)
+                while bot:getTile(tile.x,tile.y).fg == 0 and bot:hasAccessToTile(tile.x,tile.y) do
+                    place(seedId,0,0)
+                    sleep(delayPlant)
+                    reconnect(world,doorFarm,tile.x,tile.y)
+                end
+            end
+        end
+    end
+    countWorld(world)
+    sleep(100)
+    if findItem(seedId) >= 100 then
+        storeSeed(world)
+        sleep(100)
+    end
+end
+
+function pnb(world)
+    if findItem(blockId) >= tileNumber then
+        botInfo("Breaking Blocks")
+        if not customPNB then
+            ex = 1
+            ye = math.floor(bot:getLocal().pos.y / 32)
+            if ye > 40 then
+                ye = ye - 10
+            elseif ye < 11 then
+                ye = ye + 10
+            end
+            if bot:getTile(ex,ye).fg ~= 0 and bot:getTile(ex,ye).fg ~= seedId then
+                ye = ye - 1
+            end
+        else
+            ex = customX
+            ye = customY
+        end
+        while math.floor(bot:getLocal().pos.x / 32) ~= ex or math.floor(bot:getLocal().pos.y / 32) ~= ye do
+            bot:findPath(ex,ye)
+            sleep(1500)
+        end
+        if tileNumber > 1 then
+            while findItem(blockId) >= tileNumber and findItem(seedId) < 190 do
+                while tilePlace(ex,ye) do
+                    for _,i in pairs(tileBreak) do
+                        if bot:getTile(ex - 1,ye + i).fg == 0 and bot:getTile(ex - 1,ye + i).bg == 0 then
+                            place(blockId,-1,i)
+                            sleep(delayPlace)
+                            reconnect(world,doorFarm,ex,ye)
+                        end
+                    end
+                end
+                while tilePunch(ex,ye) do
+                    for _,i in pairs(tileBreak) do
+                        if bot:getTile(ex - 1,ye + i).fg ~= 0 or bot:getTile(ex - 1,ye + i).bg ~= 0 then
+                            punch(-1,i)
+                            sleep(delayPunch)
+                            reconnect(world,doorFarm,ex,ye)
+                        end
+                    end
+                end
+                reconnect(world,doorFarm,ex,ye)
+            end
+        else
+            while findItem(blockId) > 0 and findItem(seedId) < 190 do
+                while bot:getTile(ex - 1,ye).fg == 0 and bot:getTile(ex - 1,ye).bg == 0 do
+                    place(blockId,-1,0)
+                    sleep(delayPlace)
+                    reconnect(world,doorFarm,ex,ye)
+                end
+                while bot:getTile(ex - 1,ye).fg ~= 0 or bot:getTile(ex - 1,ye).bg ~= 0 do
+                    punch(-1,0)
+                    sleep(delayPunch)
+                    reconnect(world,doorFarm,ex,ye)
+                end
+            end
+        end
+        clear()
+        sleep(100)
+        if bot:getLocal().gems >= minimumGem then
+            buy()
+            sleep(100)
+            warp(world,doorFarm)
+            sleep(100)
+            bot:autoCollect(3, true)
+            sleep(100)
+            botInfo("Farming")
+            sleep(100)
+        end
+    end
+end
+
+function scanBlock()
+    local store = {}
+    for _,obj in pairs(bot:getObjects()) do       
+        if obj.id == blockId then
+            if store[obj.id] then
+                store[obj.id].count = store[obj.id].count + obj.count
+            else
+                store[obj.id] = {id = obj.id, count = obj.count}
+            end
+        end
+    end
+    if store[blockId] then
+        return store[blockId].count
+    else
+        return 0
+    end
+end
+
+function takeBlock(world)
+    for _,obj in pairs(bot:getObjects()) do
+        if obj.id == blockId and #bot:getPath(round(obj.pos.x/32), math.floor(obj.pos.y/32)) > 0 then
+            bot:findPath(round(obj.pos.x / 32),math.floor(obj.pos.y / 32))
+            sleep(500)
+            collect(2)
+            sleep(1000)
+            reconnect(world, doorFarm, round(obj.pos.x / 32),math.floor(obj.pos.y / 32))
+        end
+        if findItem(blockId) >= 190 then
+            break
+        end
+    end
+end
+
+function pnb2(world)
+    if findItem(blockId) < tileNumber then
+        takeBlock(world)
+        sleep(100)
+    end
+    if findItem(blockId) >= tileNumber then
+        botInfo("Breaking Blocks")
+        sleep(100)
+        if not customPNB then
+            ex = 1
+            ye = math.floor(bot:getLocal().pos.y / 32)
+            if ye > 40 then
+                ye = ye - 10
+            elseif ye < 11 then
+                ye = ye + 10
+            end
+            if bot:getTile(ex,ye).fg ~= 0 and bot:getTile(ex,ye).fg ~= seedId then
+                ye = ye - 1
+            end
+        else
+            ex = customX
+            ye = customY
+        end
+        while math.floor(bot:getLocal().pos.x / 32) ~= ex or math.floor(bot:getLocal().pos.y / 32) ~= ye do
+            bot:findPath(ex,ye)
+            sleep(1500)
+        end
+        if tileNumber > 1 then
+            while findItem(blockId) >= tileNumber and findItem(seedId) < 190 do
+                while tilePlace(ex,ye) do
+                    for _,i in pairs(tileBreak) do
+                        if bot:getTile(ex - 1,ye + i).fg == 0 and bot:getTile(ex - 1,ye + i).bg == 0 then
+                            place(blockId,-1,i)
+                            sleep(delayPlace)
+                            reconnect(world,doorFarm,ex,ye)
+                        end
+                    end
+                end
+                while tilePunch(ex,ye) do
+                    for _,i in pairs(tileBreak) do
+                        if bot:getTile(ex - 1,ye + i).fg ~= 0 or bot:getTile(ex - 1,ye + i).bg ~= 0 then
+                            punch(-1,i)
+                            sleep(delayPunch)
+                            reconnect(world,doorFarm,ex,ye)
+                        end
+                    end
+                end
+                reconnect(world,doorFarm,ex,ye)
+            end
+        else
+            while findItem(blockId) > 0 and findItem(seedId) < 190 do
+                while bot:getTile(ex - 1,ye).fg == 0 and bot:getTile(ex - 1,ye).bg == 0 do
+                    place(blockId,-1,0)
+                    sleep(delayPlace)
+                    reconnect(world,doorFarm,ex,ye)
+                end
+                while bot:getTile(ex - 1,ye).fg ~= 0 or bot:getTile(ex - 1,ye).bg ~= 0 do
+                    punch(-1,0)
+                    sleep(delayPunch)
+                    reconnect(world,doorFarm,ex,ye)
+                end
+            end
+        end
+        clear()
+        sleep(100)
+        if bot:getLocal().gems >= minimumGem then
+            buy()
+            sleep(100)
+            warp(world,doorFarm)
+            sleep(100)
+            bot:autoCollect(3, true)
+            sleep(100)
+            botInfo("Farming")
+            sleep(100)
+        end
+    end
+end
+
+function harvest(world)
+    botInfo("Harvesting Trees")
+    sleep(100)
+    countWorld(world)
+    sleep(100)
+    for _,tile in ipairs(bot:getTiles()) do
+        if tile.fg == seedId then
+            if bot:canHarvest(tile.x,tile.y) and bot:hasAccessToTile(tile.x, tile.y) then
+                bot:findPath(tile.x,tile.y)
+                sleep(100)
+                while bot:getTile(tile.x,tile.y).fg == seedId and bot:canHarvest(tile.x,tile.y) and bot:hasAccessToTile(tile.x, tile.y) do
+                    punch(0,0)
+                    sleep(delayHarvest)
+                    reconnect(world,doorFarm,tile.x,tile.y)
+                end
+            end
+        end
+        if findItem(blockId) >= 190 or findItem(seedId) >= 190 then
+            pnb(world)
+            sleep(100)
+            plant(world)
+            sleep(100)
+        end
+    end
+    countWorld(world)
+    sleep(100)
+    pnb(world)
+    sleep(100)
+    plant2(world)
+    sleep(100)
+    if bot:getLocal().gems >= minimumGem then
+        buy()
+        sleep(100)
+    end
+end
+
+function collect2(range)
+    for i,obj in pairs(bot:getObjects()) do
+        local objx = round(obj.pos.x/32)
+        local objy = math.floor(obj.pos.y/32)
+        if obj.count < 190 then
+            if bot:isInside(objx, objy, range) then
+                bot:collectObject(obj.uid)
+            end
+        end
+    end
+end
+
+function harvest2(world)
+    botInfo("Harvesting Trees")
+    sleep(100)
+    countWorld(world)
+    sleep(100)
+    for _,tile in ipairs(bot:getTiles()) do
+        if tile.fg == seedId then
+            if bot:canHarvest(tile.x,tile.y) and bot:hasAccessToTile(tile.x, tile.y) then
+                bot:findPath(tile.x,tile.y)
+                sleep(100)
+                bot:autoCollect(2, false)
+                while bot:getTile(tile.x,tile.y).fg == seedId and bot:canHarvest(tile.x,tile.y) and bot:hasAccessToTile(tile.x, tile.y) do
+                    punch(0,0)
+                    sleep(delayHarvest)
+                    collect2(3)
+                    reconnect(world,doorFarm,tile.x,tile.y)
+                end
+            end
+            if findItem(blockId) >= 190 then
+                while findItem(blockId) >= 190 and tileDrop1(tile.x + 1,tile.y, findItem(blockId)) do
+                    bot:sendPacket("action|drop\n|itemID|"..blockId, 2)
+                    sleep(1250)
+                    bot:sendPacket("action|dialog_return\ndialog_name|drop_item\nitemID|"..blockId.."|\ncount|"..findItem(blockId), 2)
+                    sleep(1250)
+                    reconnect(world,doorFarm,tile.x,tile.y)
+                end
+            end
+        end
+        if findItem(seedId) >= 190 then
+           storeSeed(world)
+           sleep(100)
+        end
+        if bot:getLocal().level >= minimumLevel then
+            bot:autoCollect(3, true)
+            sleep(100)
+            break
+        end
+    end
+    if bot:getLocal().gems >= minimumGem then
+        buy()
+        sleep(100)
+    end
+end
+
+function wear(id)
+    pkt = {}
+    pkt.type = 10
+    pkt.int_data = id
+    bot:sendPacketRaw(pkt)
+end
+
+function takePickaxe()
+    if autoPickaxe then
+        warp(pickStorage,doorPick)
+        sleep(100)
+        bot:autoCollect(3, false)
+        sleep(100)
+        for _,obj in pairs(bot:getObjects()) do
+            if obj.id == 98 then
+                bot:findPath(round(obj.pos.x / 32)-1,math.floor(obj.pos.y / 32))
+                sleep(1000)
+                collect(2, 98)
+                sleep(1000)
+                reconnect(pickStorage,doorPick)
+            end
+            if findItem(98) > 1 then
+                while findItem(98) > 1 and tileDrop1(round(obj.pos.x / 32),math.floor(obj.pos.y / 32), findItem(98)-1) do
+                    bot:sendPacket("action|drop\n|itemID|98", 2)
+                    sleep(1250)
+                    bot:sendPacket("action|dialog_return\ndialog_name|drop_item\nitemID|98|\ncount|"..findItem(98)-1, 2)
+                    sleep(1250)
+                    reconnect(pickStorage,doorPick)
+                end
+            end
+            if findItem(98) == 1 then
+                break
+            end
+        end
+        wear(98)
+        sleep(2000)
+    end
+end
+
+takePickaxe()
+while true do
+    leveledUp = false
+    for index,world in pairs(worlds) do
+        sleep(100)
+        warp(world,doorFarm)
+        sleep(100)
+        bot:autoCollect(3, true)
+        sleep(100)
+        bl(world)
+        sleep(100)
+        countWorld(world)
+        sleep(100)
+        botInfo("Starting "..world)
+        sleep(100)
+        tt = os.time()
+
+        local hasBlocks = scanBlock() > 0
+        local isAboveMinLevel = bot:getLocal().level >= minimumLevel
+        
+        if hasBlocks and isAboveMinLevel then
+            plant3(world)
+            sleep(100)
+            while scanBlock() > 0 do
+                pnb2(world)
+                sleep(100)
+                if findItem(seedId) >= 100 then
+                    storeSeed(world)
+                    sleep(100)
+                end
+            end
+        elseif not hasBlocks and isAboveMinLevel then
+            harvest(world)
+            sleep(100)
+        elseif not isAboveMinLevel then
+            harvest2(world)
+            sleep(100)
+            if isAboveMinLevel then
+                leveledUp = true
+            end
+        end
+        if leveledUp then
+            break
+        end
+
+        tt = os.time() - tt
+        botInfo("Finished "..world)
+        sleep(100)
+        if start < stop then
+            start = start + 1
+        else
+            if restartTimer then
+                waktu = {}
+                tree = {}
+            end
+            start = 1
+        end
+    end
+    if not looping and not leveledUp and not rangeFarming then
+        botInfo("Finished All World, Removing Bot!")
+        sleep(100)
+        bot:remove()
+        break
+    end
+end
